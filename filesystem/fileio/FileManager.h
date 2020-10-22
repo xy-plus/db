@@ -7,7 +7,8 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <fcntl.h>
-//#include "../MyLinkList.h"
+#include "../utils/pagedef.h"
+#include "../utils/MyBitMap.h"
 using namespace std;
 class FileManager {
 private:
