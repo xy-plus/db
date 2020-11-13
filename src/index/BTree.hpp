@@ -35,7 +35,31 @@ public:
 	}
 
 	bool cmp(Value b, Vector<CmpOP> ops) {
+		switch ops[0]{
+		case LE:
+			break;
 
+		case GE:
+			break;
+		case LT:
+			break;
+		case GT:
+			break;
+		case EQ:
+			break;
+		default:
+			break;
+		}
+		return true;
+	}
+
+	bool check(Value b, Vector<CmpOP> ops) {
+		for (int i = 0; i < vals.size(); ++i) {
+			if (!val[i].cmp(b[i], ops[i])) {
+				return false;
+			}
+		}
+		return true;
 	}
 };
 
@@ -48,7 +72,7 @@ public:
 		isLeaf = true;
 	}
 
-	TreeNode(string context) {
+	TreeNode(char* data) {
 		// TODO
 	}
 
@@ -339,16 +363,19 @@ private:
 
 	TreeNode* getNode(RecordID rid) {
 		Record temp;
-		TreeNode* p = new TreeNode();
+		TreeNode* p;
 		if (fileHandler->getRecordById(rid, temp)) {
-			// TODO
+			p = new TreeNode((char*)temp.getData());
+		}
+		else {
+			p = new TreeNode();
 		}
 		return p;
 	}
 
 	void saveNode(RecordID rid, TreeNode* temp) {
-		// TODO
 		BufType record;
+		temp->to_string((char*)record);
 		fileHandler->modifyRecord(rid, record);
 	}
 
@@ -393,9 +420,8 @@ private:
 		if (temp.isLeaf) {
 			int keyNum = temp.getKeyNum();
 			for (int i = 0; i < keyNum; ++i) {
-				// TODO
 				Value val = temp->getKey(i);
-				if (val.cmp(key, ops) == 0) {
+				if (val.check(key, ops) == 0) {
 					ans.push_back(temp->getChild(i));
 				}
 			}

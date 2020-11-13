@@ -1,15 +1,24 @@
 #pragma once
 #include <string>
+#include <vector>
 #include "utils.h"
 
 using namespace std;
 
 class Type {
+	bool isNull;
 public:
+	void setIsNull(bool _null) {
+		isNull = _null;
+	}
 	void toChars(char* buf, int& len) {};
 
 	AttrType getType() {
 		return 0;
+	}
+
+	bool getIsNull() {
+		return isNull;
 	}
 
 	bool isInt() {
@@ -39,7 +48,7 @@ public:
 
 // 整数类型
 class IntType : public Type{
-	// TODO
+	int num;
 public:
 	bool isInt() {
 		return true;
@@ -49,30 +58,90 @@ public:
 		return INTEGER;
 	}
 
+	void setInt(int _num) {
+		num = _num;
+	}
+
+	int getInt() {
+		return num;
+	}
+
+	void toChars(char* buf, int& len) {
+		buf = new char[4];
+		len = 4;
+		((int*)(buf))[0] = num;
+	}
+
 	bool cmp(Type b, CmpOP op) {
-		// TODO
 		bool ok = false;
 		if (b.isInt()) {
+			IntType temp = (IntType)b;
 			switch (op) {
 				case EQ:
+					if (b.getIsNull() || this->getIsNull())
+						break;
+					if (temp.num == num) {
+						ok = true;
+					} else {
+						ok = false;
+					}
 					break;
 				case NE:
+					if (b.getIsNull() || this->getIsNull())
+						break;
+					if (temp.num != num) {
+						ok = true;
+					} else {
+						ok = false;
+					}
 					break;
 				case LT:
+					if (b.getIsNull() || this->getIsNull())
+						break;
+					if (num < temp.num) {
+						ok = true;
+					} else {
+						ok = false;
+					}
 					break;
 				case GT:
+					if (b.getIsNull() || this->getIsNull())
+						break;
+					if (num > temp.num) {
+						ok = true;
+					} else {
+						ok = false;
+					}
 					break;
 				case LE:
+					if (b.getIsNull() || this->getIsNull())
+						break;
+					if (num <= temp.num) {
+						ok = true;
+					} else {
+						ok = false;
+					}
 					break;
 				case GE:
+					if (b.getIsNull() || this->getIsNull())
+						break;
+					if (num >= temp.num) {
+						ok = true;
+					} else {
+						ok = false;
+					}
 					break;
 				case NO:
+					ok = true;
 					break;
 				case ISNOTNULL:
+					ok = !getIsNull();
 					break;
 				case ISNOTNULL:
+					ok = getIsNull();
 					break;
 				case IN:
+					// TODO
 					break;
 				default:
 					break;
@@ -107,6 +176,33 @@ class DateType : public Type {
 
 	bool setDay(int day) {
 		this->year = year;
+	}
+
+	bool equal(DateType b) {
+		if (b.year != year)
+			return false;
+		if (b.month != month)
+			return false;
+		if (b.day != day)
+			return false;
+	}
+
+	bool less(DateType b) {
+		if (b.year < year)
+			return false;
+		if (b.year > year)
+			return true;
+
+		if (b.month < month)
+			return false;
+		if (b.month > month)
+			return true;
+
+		if (b.day < day)
+			return false;
+		if (b.day > day)
+			return true;
+		return false;
 	}
 public:
 	DateType() {
@@ -235,20 +331,98 @@ public:
 		this->day = d;
 		return true;
 	}
+
+	bool cmp(Type b, CmpOP op) {
+		bool ok = false;
+		if (b.isDate()) {
+			DateType temp = (DateType)b;
+			switch (op) {
+			case EQ:
+				if (b.getIsNull() || this->getIsNull())
+					break;
+				ok = equal(temp);
+				break;
+			case NE:
+				if (b.getIsNull() || this->getIsNull())
+					break;
+				ok = !equal(temp);
+				break;
+			case LT:
+				if (b.getIsNull() || this->getIsNull())
+					break;
+				ok = less(temp);
+				break;
+			case GT:
+				if (b.getIsNull() || this->getIsNull())
+					break;
+				ok = temp.less(*this);
+				break;
+			case LE:
+				if (b.getIsNull() || this->getIsNull())
+					break;
+				ok = less(temp) | equal(temp);
+				break;
+			case GE:
+				if (b.getIsNull() || this->getIsNull())
+					break;
+				ok = temp.less(*this) | equal(temp);
+				break;
+			case NO:
+				ok = true;
+				break;
+			case ISNOTNULL:
+				ok = !getIsNull();
+				break;
+			case ISNOTNULL:
+				ok = getIsNull();
+				break;
+			case IN:
+				// TODO
+				break;
+			default:
+				break;
+			}
+		}
+		else {
+			return false;
+		}
+		return ok;
+	}
 };
 
 // 固定长度字符串
 class CharType : public Type {
 	int length;
-	char* val;
+	vector<char> val;
+
+	bool equal(CharType b) {
+		if (b.length != this->length)
+			return false;
+		for (int i = 0; i < length; ++i)
+			if (b.val[i] != this->val[i])
+				return false;
+	}
+
+	bool less(CharType b) {
+		string s1 = "";
+		string s2 = "";
+		for (int i = 0; i < length; ++i)
+			s1 += this.val[i];
+		for (int i = 0; i < b.length; ++i)
+			s2 += b.val[i];
+		return s1 < s2;
+	}
 public:
 	CharType(int len) {
 		length = len;
-		val = new char[len];
+		val.clear();
+		for (int i = 0; i < len; ++i) {
+			val.push_back(' ');
+		}
 	}
 
 	~CharType() {
-		delete[] val;
+		val.clear();
 	}
 
 	AttrType getType() {
@@ -272,9 +446,67 @@ public:
 
 	void toChars(char* buf, int& len) {
 		len = length;
-		buf = new char[length];
+		buf = new char[length + 1];
+		buf[0] = (char)len;
 		for (int i = 0; i < length; ++i)
-			buf[i] = val[i];
+			buf[i + 1] = val[i];
+	}
+
+	bool cmp(Type b, CmpOP op) {
+		bool ok = false;
+		if (b.isChar()) {
+			CharType temp = (CharType)b;
+			switch (op) {
+			case EQ:
+				if (b.getIsNull() || this->getIsNull())
+					break;
+				ok = equal(temp);
+				break;
+			case NE:
+				if (b.getIsNull() || this->getIsNull())
+					break;
+				ok = !equal(temp);
+				break;
+			case LT:
+				if (b.getIsNull() || this->getIsNull())
+					break;
+				ok = less(temp);
+				break;
+			case GT:
+				if (b.getIsNull() || this->getIsNull())
+					break;
+				ok = temp.less(*this);
+				break;
+			case LE:
+				if (b.getIsNull() || this->getIsNull())
+					break;
+				ok = less(temp) | equal(temp);
+				break;
+			case GE:
+				if (b.getIsNull() || this->getIsNull())
+					break;
+				ok = temp.less(*this) | equal(temp);
+				break;
+			case NO:
+				ok = true;
+				break;
+			case ISNOTNULL:
+				ok = !getIsNull();
+				break;
+			case ISNOTNULL:
+				ok = getIsNull();
+				break;
+			case IN:
+				// TODO
+				break;
+			default:
+				break;
+			}
+		}
+		else {
+			return false;
+		}
+		return ok;
 	}
 };
 
@@ -282,15 +514,35 @@ public:
 class VarcharType : public Type {
 	int maxlength;
 	int length;
-	char* val;
+	vector<char> val;
+
+	bool equal(VarcharType b) {
+		if (b.length != this->length)
+			return false;
+		for (int i = 0; i < length; ++i)
+			if (b.val[i] != this->val[i])
+				return false;
+	}
+
+	bool less(VarcharType b) {
+		string s1 = "";
+		string s2 = "";
+		for (int i = 0; i < length; ++i)
+			s1 += this.val[i];
+		for (int i = 0; i < b.length; ++i)
+			s2 += b.val[i];
+		return s1 < s2;
+	}
 public:
 	VarcharType(int len) {
 		maxlength = len;
-		val = new char[len];
+		val.clear();
+		for (int i = 0; i < len; ++i) {
+			val.push_back(' ');
+		}
 	}
 
 	~VarcharType() {
-		delete[] val;
 	}
 
 	AttrType getType() {
@@ -314,15 +566,78 @@ public:
 
 	void toChars(char* buf, int& len) {
 		len = length;
-		buf = new char[length];
+		buf = new char[length + 1];
+		buf[0] = (char)len;
 		for (int i = 0; i < length; ++i)
-			buf[i] = val[i];
+			buf[i + 1] = val[i];
+	}
+
+	bool cmp(Type b, CmpOP op) {
+		bool ok = false;
+		if (b.isVarchar()) {
+			VarcharType temp = (VarcharType)b;
+			switch (op) {
+			case EQ:
+				if (b.getIsNull() || this->getIsNull())
+					break;
+				ok = equal(temp);
+				break;
+			case NE:
+				if (b.getIsNull() || this->getIsNull())
+					break;
+				ok = !equal(temp);
+				break;
+			case LT:
+				if (b.getIsNull() || this->getIsNull())
+					break;
+				ok = less(temp);
+				break;
+			case GT:
+				if (b.getIsNull() || this->getIsNull())
+					break;
+				ok = temp.less(*this);
+				break;
+			case LE:
+				if (b.getIsNull() || this->getIsNull())
+					break;
+				ok = less(temp) | equal(temp);
+				break;
+			case GE:
+				if (b.getIsNull() || this->getIsNull())
+					break;
+				ok = temp.less(*this) | equal(temp);
+				break;
+			case NO:
+				ok = true;
+				break;
+			case ISNOTNULL:
+				ok = !getIsNull();
+				break;
+			case ISNOTNULL:
+				ok = getIsNull();
+				break;
+			case IN:
+				// TODO
+				break;
+			default:
+				break;
+			}
+		}
+		else {
+			return false;
+		}
+		return ok;
 	}
 };
 
 // 小数，固定小数位数，总位数有限制
 class NumericType : public Type {
 	// TODO
+	Vector<int> num;
+	int allLength;
+	int backLength;
+
+
 public:
 	AttrType getType() {
 		return NUMERIC;
