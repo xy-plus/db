@@ -8,10 +8,15 @@ using namespace std;
 class Type {
 	bool isNull;
 public:
+
+	int length() {}
+
 	void setIsNull(bool _null) {
 		isNull = _null;
 	}
-	void toChars(char* buf, int& len) {};
+	void toChars(char* buf, int& len) {}
+
+	void fromChars(char* buf, int len) {}
 
 	AttrType getType() {
 		return 0;
@@ -50,6 +55,14 @@ public:
 class IntType : public Type{
 	int num;
 public:
+	int length() {
+		return 4;
+	}
+
+	void fromChars(char* buf, int len) {
+		num = ((int*)(buf))[0];
+	}
+
 	bool isInt() {
 		return true;
 	}
@@ -215,6 +228,27 @@ public:
 		year = a.year;
 		month = a.month;
 		day = a.day;
+	}
+
+	int length() {
+		return 10;
+	}
+
+	void fromChars(char* buf, int len) {
+		int a, b, c, d;
+		a = buf[0] - '0';
+		b = buf[1] - '0';
+		c = buf[2] - '0';
+		d = buf[3] - '0';
+		year = a * 1000 + b * 100 + c * 10 + d;
+
+		a = buf[5] - '0';
+		b = buf[6] - '0';
+		month = a * 10 + b;
+
+		a = buf[8] - '0';
+		b = buf[9] - '0';
+		day = a * 10 + b;
 	}
 
 	AttrType getType() {
@@ -425,6 +459,18 @@ public:
 		val.clear();
 	}
 
+	int length() {
+		return length;
+	}
+
+	void fromChars(char* buf, int len) {
+		length = len;
+		val.clear();
+		for (int i = 0; i < len; ++i) {
+			val.push_back(buf[i]);
+		}
+	}
+
 	AttrType getType() {
 		return CHAR;
 	}
@@ -446,10 +492,9 @@ public:
 
 	void toChars(char* buf, int& len) {
 		len = length;
-		buf = new char[length + 1];
-		buf[0] = (char)len;
+		buf = new char[length];
 		for (int i = 0; i < length; ++i)
-			buf[i + 1] = val[i];
+			buf[i] = val[i];
 	}
 
 	bool cmp(Type b, CmpOP op) {
@@ -543,6 +588,19 @@ public:
 	}
 
 	~VarcharType() {
+	}
+
+	int length() {
+		return maxlength;
+	}
+
+	void fromChars(char* buf, int len) {
+		maxlength = len;
+		length = (int)(buf[0]);
+		val.clear();
+		for (int i = 0; i < length; ++i) {
+			val.push_back(buf[i + 1]);
+		}
 	}
 
 	AttrType getType() {

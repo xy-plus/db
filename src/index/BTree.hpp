@@ -15,26 +15,103 @@ int BTreeM = 5;
 int LIMIT = (BTreeM % 2) ? (M + 1) / 2 : M / 2;
 
 class Value {
-	// TODO:不同类型数据、多数据（联合索引）
-	Vector<AttrType> attrs;
-	Vector<Type> vals;
+	vector<AttrType> attrs;
+	vector<Type*> vals;
 	friend class BTree;
 public:
 	int legnth() {
-		return attrs.size();
+		/*
+		1: int vals.size()
+		n: int attrs
+		n: int + length vals
+		*/
+		int len = sizeof(int) * (1 + vals.size() * 2);
+		for (int i = 0; i < vals.size(); ++i) {
+			len += vals[i]->length();
+		}
+		return len;
 	}
 
-	void setVals(Vector<Type> val) {
+	void setVals(char* data) {
+		int offset = 0;
+		int n = ((int*)(data + offset))[0];
+		offset += sizeof(int);
+		for (int i = 0; i < n; ++i) {
+			int temp = ((int*)(data + offset))[0];
+			attrs.push_back(temp);
+			offset += sizeof(int);
+		}
+
+		for (int i = 0; i < n; ++i) {
+			int len = ((int*)(data + offset))[0];
+			offset += sizeof(int);
+
+			switch (attr[i]) {
+			case INTEGER:
+				Type* tp = new IntType();
+				tp->fromChars(data + offset, len);
+				vals.push_back(tp);
+				break;
+			case DATE:
+				Type* tp = new DateType();
+				tp->fromChars(data + offset, len);
+				vals.push_back(tp);
+				break;
+			case CHAR:
+				Type* tp = new CharType();
+				tp->fromChars(data + offset, len);
+				vals.push_back(tp);
+				break;
+			case VARCHAR:
+				Type* tp = new VarcharType();
+				tp->fromChars(data + offset, len);
+				vals.push_back(tp);
+				break;
+			case NUMERIC:
+				Type* tp = new NumericType();
+				tp->fromChars(data + offset, len);
+				vals.push_back(tp);
+				break;
+			default:
+				break;
+			}
+			offset += len;
+		}
+		
+	}
+
+	void setVals(vector<Type*> val) {
 		vals.assign(val.begin(), val.end());
 		for (int i = 0; i < val.size(); ++i) {
-			attrs.push_back(val[i].getType());
+			attrs.push_back(val[i]->getType());
 		}
 	}
 
 	string toString() {
+		// TODO : char* to string
+		char* temp = new char[4096];
+		int offset = 0;
+		((int*)(temp + offset))[0] = vals.size();
+		offset += sizeof(int);
+
+		for (int i = 0; i < attrs.size(); ++i) {
+			((int*)(temp + offset))[0] = attrs[i];
+			offset += sizeof(int);
+		}
+
+		for (int i = 0; i < vals.size(); ++i) {
+			int len;
+			offset += sizeof(int);
+			vals[i]->toChars(temp + offset, len);
+			offset -= sizeof(int);
+			((int*)(temp + offset))[0] = len;
+			offset = offset + sizeof(int) + len;
+		}
+
 	}
 
 	bool cmp(Value b, Vector<CmpOP> ops) {
+		// TODO
 		switch ops[0]{
 		case LE:
 			break;
@@ -55,7 +132,7 @@ public:
 
 	bool check(Value b, Vector<CmpOP> ops) {
 		for (int i = 0; i < vals.size(); ++i) {
-			if (!val[i].cmp(b[i], ops[i])) {
+			if (!vals[i]->cmp(*(b.vals[i]), ops[i])) {
 				return false;
 			}
 		}
@@ -73,11 +150,39 @@ public:
 	}
 
 	TreeNode(char* data) {
-		// TODO
+		int keySize = ((int*)(data + offsetM))[0];
+		int num = ((int*)(data + offsetIsLeaf))[0];
+		if (num == 0) {
+			isLeaf = false;
+		}
+		else {
+			isLeaf = true;
+		}
+
+		father = ((RecordID*)(data + offsetFather))[0];
+
+		RecordID* rbuf = (RecordID*)(data + offsetChild);
+		for (int i = 0; i < keySize; ++i)
+			child.push_back(rbuf[i]);
+
+		int offset = offsetChild + keySize * sizeof(RecordID);
+		int attrLength = ((int*)(data + offset))[0];
+		offset = offset + sizeof(int);
+
+		char* cbuf = (char*)(data + offset);
+		char* temp = new char[attrLength];
+		for (int i = 0; i < keySize; ++i) {
+			memcpy(temp, cbuf, (size_t)attrLength);
+			cbuf += attrLength;
+			Value temp_v;
+			temp_v.setVals(temp);
+			key.push_back(temp_v);
+		}
+		delete[] temp;
 	}
 
 	void to_string(char* data) {
-		((int*)(buffer + offsetM))[0] = key.size() + child.size();
+		((int*)(buffer + offsetM))[0] = key.size();
 		((int*)(buffer + offsetIsLeaf))[0] = isLeaf;
 		((RecordID*)(buffer + offsetFather))[0] = father;
 
@@ -218,6 +323,7 @@ private:
 };
 
 class BTree {
+	// TODO : uodata record & vector<Type*>
 public:
 	BTree(BufPageManager* bpm, FileManager* fm) {
 		this.bpm = bpm;
@@ -227,7 +333,7 @@ public:
 	~BTree() {
 	}
 
-	bool update_Record(RecordID rid, vector<Type> oldVal, vector<Type> newVal) {
+	bool update_Record(RecordID rid, RecordID newrid, vector<Type*> oldVal, vector<Type*> newVal) {
 		Value oldKey;
 		Value newKey;
 		oldKey.setVals(oldVal);
@@ -253,7 +359,7 @@ public:
 		return true;
 	}
 
-	bool insert_Record(RecordID rid, vector<Type> vals) {
+	bool insert_Record(RecordID rid, vector<Type*> vals) {
 		// new Record
 		Value newKey;
 		newKey.setVals(vals);
@@ -267,13 +373,13 @@ public:
 		return true;
 	}
 
-	bool delete_Record(vector<Type> vals) {
+	bool delete_Record(vector<Type*> vals) {
 		Value oldKey;
 		oldKey.setVals(vals);
 		return deleteNode(root, oldKey);
 	}
 
-	vector<RecordID> find_Record(vector<Type> vals, vector<CmpOP> ops) {
+	vector<RecordID> find_Record(vector<Type*> vals, vector<CmpOP> ops) {
 		Value key;
 		key.setVals(vals);
 		return findNode(root, key, ops);
@@ -696,6 +802,7 @@ private:
 			else {
 				RecordID bro;
 				TreeNode* temp_bro;
+				// TODO : only empty will delete
 				bool ok = false;
 				if (getPrevNode(now, bro)) {
 					temp_bro = getNode(bro);
