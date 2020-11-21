@@ -1,11 +1,14 @@
 #include <iostream>
+#include <assert.h>
 #include "../filesystem/fileio/FileManager.h"
 #include "../filesystem/utils/MyHashMap.h"
 #include "FileHandler.hpp"
 #include "Record.hpp"
 #include "test.hpp"
-#include "index/BTree.hpp"
-#include "index/IndexManager.hpp"
+#include "utils.h"
+#include "Types.hpp"
+//#include "index/BTree.hpp"
+//#include "index/IndexManager.hpp"
 using namespace std;
 
 const char testFileName[] = "test.txt";
@@ -53,7 +56,7 @@ void exit_db() {
     bpm->close();
     delete fm;
 }
-
+/*
 void index_operator() {
 	IndexManager indexManager(bpm, fm);
 
@@ -131,6 +134,28 @@ void index_operator() {
 	// 删除索引：文件名、索引对应列号
 	indexManager.delete_index(file, attrNo);
 }
+*/
+void test_type() {
+	freopen("answer.txt", "w", stdout);
+
+	Type* tp1 = new IntType();
+	((IntType*)tp1)->setInt(1);
+	Type* tp2 = new IntType();
+	((IntType*)tp2)->setInt(2);
+	char* buf;
+	int len;
+	tp1->toChars(buf, len);
+	for (int i = 0; i < len; ++i)
+		cout << buf[i];
+	cout << endl;
+	tp1->fromChars(buf, len);
+
+	delete[] buf;
+	delete tp1;
+	delete tp2;
+
+	fclose(stdout);
+}
 
 int main() {
     init();
@@ -139,7 +164,8 @@ int main() {
     FileHandler* fh = openFile(testFileName);
     test_db(fh, record_len);
 
-	index_opertaor();
+	// index_opertaor();
+	test_type();
 
     exit_db();
     return 0;

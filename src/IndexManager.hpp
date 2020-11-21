@@ -1,10 +1,10 @@
 #pragma once
-#include "../../filesystem/fileio/FileManager.h"
-#include "../../filesystem/utils/MyHashMap.h"
-#include "../Record.hpp"
-#include "../FileHandler.hpp"
-#include "../utils.h"
-#include "../Types.hpp"
+#include "../filesystem/fileio/FileManager.h"
+#include "../filesystem/utils/MyHashMap.h"
+#include "Record.hpp"
+#include "FileHandler.hpp"
+#include "utils.h"
+#include "Types.hpp"
 #include "BTree.hpp"
 #include <vector>
 

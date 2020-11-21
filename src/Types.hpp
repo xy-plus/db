@@ -6,47 +6,48 @@
 using namespace std;
 
 class Type {
-	bool isNull;
+	bool isNull = false;
 public:
 
-	int length() {}
+	virtual int getLength() {}
 
 	void setIsNull(bool _null) {
 		isNull = _null;
-	}
-	void toChars(char* buf, int& len) {}
-
-	void fromChars(char* buf, int len) {}
-
-	AttrType getType() {
-		return 0;
 	}
 
 	bool getIsNull() {
 		return isNull;
 	}
 
-	bool isInt() {
+	virtual void toChars(char* buf, int& len) {}
+
+	virtual void fromChars(char* buf, int len) {}
+
+	virtual AttrType getType() {
+		return INTEGER;
+	}
+
+	virtual bool isInt() {
 		return false;
 	}
 
-	bool isDate() {
+	virtual bool isDate() {
 		return false;
 	}
 
-	bool isChar() {
+	virtual bool isChar() {
 		return false;
 	}
 
-	bool isVarChar() {
+	virtual bool isVarchar() {
 		return false;
 	}
 
-	bool isNumeric() {
+	virtual bool isNumeric() {
 		return false;
 	}
 
-	bool cmp(Type b, CmpOP op) {
+	virtual bool cmp(Type* b, CmpOP op) {
 		return false;
 	}
 };
@@ -55,7 +56,16 @@ public:
 class IntType : public Type{
 	int num;
 public:
-	int length() {
+	IntType() {
+		num = 0;
+	}
+
+	IntType(IntType* b) {
+		num = b->num;
+		this->setIsNull(b->getIsNull());
+	}
+
+	int getLength() {
 		return 4;
 	}
 
@@ -80,65 +90,64 @@ public:
 	}
 
 	void toChars(char* buf, int& len) {
-		buf = new char[4];
 		len = 4;
 		((int*)(buf))[0] = num;
 	}
 
-	bool cmp(Type b, CmpOP op) {
+	bool cmp(Type* b, CmpOP op) {
 		bool ok = false;
-		if (b.isInt()) {
-			IntType temp = (IntType)b;
+		if (b->isInt()) {
+			IntType* temp = (IntType*)b;
 			switch (op) {
 				case EQ:
-					if (b.getIsNull() || this->getIsNull())
+					if (b->getIsNull() || this->getIsNull())
 						break;
-					if (temp.num == num) {
+					if (temp->num == num) {
 						ok = true;
 					} else {
 						ok = false;
 					}
 					break;
 				case NE:
-					if (b.getIsNull() || this->getIsNull())
+					if (b->getIsNull() || this->getIsNull())
 						break;
-					if (temp.num != num) {
+					if (temp->num != num) {
 						ok = true;
 					} else {
 						ok = false;
 					}
 					break;
 				case LT:
-					if (b.getIsNull() || this->getIsNull())
+					if (b->getIsNull() || this->getIsNull())
 						break;
-					if (num < temp.num) {
+					if (num < temp->num) {
 						ok = true;
 					} else {
 						ok = false;
 					}
 					break;
 				case GT:
-					if (b.getIsNull() || this->getIsNull())
+					if (b->getIsNull() || this->getIsNull())
 						break;
-					if (num > temp.num) {
+					if (num > temp->num) {
 						ok = true;
 					} else {
 						ok = false;
 					}
 					break;
 				case LE:
-					if (b.getIsNull() || this->getIsNull())
+					if (b->getIsNull() || this->getIsNull())
 						break;
-					if (num <= temp.num) {
+					if (num <= temp->num) {
 						ok = true;
 					} else {
 						ok = false;
 					}
 					break;
 				case GE:
-					if (b.getIsNull() || this->getIsNull())
+					if (b->getIsNull() || this->getIsNull())
 						break;
-					if (num >= temp.num) {
+					if (num >= temp->num) {
 						ok = true;
 					} else {
 						ok = false;
@@ -150,7 +159,7 @@ public:
 				case ISNOTNULL:
 					ok = !getIsNull();
 					break;
-				case ISNOTNULL:
+				case ISNULL:
 					ok = getIsNull();
 					break;
 				case IN:
@@ -174,7 +183,7 @@ class DateType : public Type {
 	int day;
 
 	bool setYear(int year) {
-		if (yaer < 1000 || year > 9999) {
+		if (year < 1000 || year > 9999) {
 			return false;
 		}
 		this->year = year;
@@ -191,29 +200,30 @@ class DateType : public Type {
 		this->year = year;
 	}
 
-	bool equal(DateType b) {
-		if (b.year != year)
+	bool equal(DateType* b) {
+		if (b->year != year)
 			return false;
-		if (b.month != month)
+		if (b->month != month)
 			return false;
-		if (b.day != day)
+		if (b->day != day)
 			return false;
+		return true;
 	}
 
-	bool less(DateType b) {
-		if (b.year < year)
+	bool less(DateType* b) {
+		if (b->year < year)
 			return false;
-		if (b.year > year)
+		if (b->year > year)
 			return true;
 
-		if (b.month < month)
+		if (b->month < month)
 			return false;
-		if (b.month > month)
+		if (b->month > month)
 			return true;
 
-		if (b.day < day)
+		if (b->day < day)
 			return false;
-		if (b.day > day)
+		if (b->day > day)
 			return true;
 		return false;
 	}
@@ -224,13 +234,14 @@ public:
 		day = 0;
 	}
 
-	DateType(DateType a) {
-		year = a.year;
-		month = a.month;
-		day = a.day;
+	DateType(DateType* b) {
+		year = b->year;
+		month = b->month;
+		day = b->day;
+		this->setIsNull(b->getIsNull());
 	}
 
-	int length() {
+	int getLength() {
 		return 10;
 	}
 
@@ -261,12 +272,11 @@ public:
 
 	void toChars(char* buf, int& len) {
 		len = 10;
-		buf = new char[10];
 		int a, b, c, d;
 		a = year / 1000;
-		b = (yaer % 1000) / 100;
-		c = (yaer % 100) / 10;
-		d = yaer % 10;
+		b = (year % 1000) / 100;
+		c = (year % 100) / 10;
+		d = year % 10;
 		buf[0] = '0' + a;
 		buf[1] = '0' + b;
 		buf[2] = '0' + c;
@@ -366,40 +376,40 @@ public:
 		return true;
 	}
 
-	bool cmp(Type b, CmpOP op) {
+	bool cmp(Type* b, CmpOP op) {
 		bool ok = false;
-		if (b.isDate()) {
-			DateType temp = (DateType)b;
+		if (b->isDate()) {
+			DateType* temp = (DateType*)b;
 			switch (op) {
 			case EQ:
-				if (b.getIsNull() || this->getIsNull())
+				if (b->getIsNull() || this->getIsNull())
 					break;
 				ok = equal(temp);
 				break;
 			case NE:
-				if (b.getIsNull() || this->getIsNull())
+				if (b->getIsNull() || this->getIsNull())
 					break;
 				ok = !equal(temp);
 				break;
 			case LT:
-				if (b.getIsNull() || this->getIsNull())
+				if (b->getIsNull() || this->getIsNull())
 					break;
 				ok = less(temp);
 				break;
 			case GT:
-				if (b.getIsNull() || this->getIsNull())
+				if (b->getIsNull() || this->getIsNull())
 					break;
-				ok = temp.less(*this);
+				ok = temp->less(this);
 				break;
 			case LE:
-				if (b.getIsNull() || this->getIsNull())
+				if (b->getIsNull() || this->getIsNull())
 					break;
 				ok = less(temp) | equal(temp);
 				break;
 			case GE:
-				if (b.getIsNull() || this->getIsNull())
+				if (b->getIsNull() || this->getIsNull())
 					break;
-				ok = temp.less(*this) | equal(temp);
+				ok = temp->less(this) | equal(temp);
 				break;
 			case NO:
 				ok = true;
@@ -407,7 +417,7 @@ public:
 			case ISNOTNULL:
 				ok = !getIsNull();
 				break;
-			case ISNOTNULL:
+			case ISNULL:
 				ok = getIsNull();
 				break;
 			case IN:
@@ -429,24 +439,39 @@ class CharType : public Type {
 	int length;
 	vector<char> val;
 
-	bool equal(CharType b) {
-		if (b.length != this->length)
+	bool equal(CharType* b) {
+		if (b->length != this->length)
 			return false;
 		for (int i = 0; i < length; ++i)
-			if (b.val[i] != this->val[i])
+			if (b->val[i] != this->val[i])
 				return false;
+		return true;
 	}
 
-	bool less(CharType b) {
+	bool less(CharType* b) {
 		string s1 = "";
 		string s2 = "";
 		for (int i = 0; i < length; ++i)
-			s1 += this.val[i];
-		for (int i = 0; i < b.length; ++i)
-			s2 += b.val[i];
+			s1 += this->val[i];
+		for (int i = 0; i < b->length; ++i)
+			s2 += b->val[i];
 		return s1 < s2;
 	}
 public:
+	CharType() {
+		length = 0;
+		val.clear();
+	}
+
+	CharType(CharType* b) {
+		length = b->length;
+		val.clear();
+		for (int i = 0; i < b->val.size(); ++i) {
+			val.push_back(b->val[i]);
+		}
+		this->setIsNull(b->getIsNull());
+	}
+
 	CharType(int len) {
 		length = len;
 		val.clear();
@@ -459,7 +484,7 @@ public:
 		val.clear();
 	}
 
-	int length() {
+	int getLength() {
 		return length;
 	}
 
@@ -492,45 +517,44 @@ public:
 
 	void toChars(char* buf, int& len) {
 		len = length;
-		buf = new char[length];
 		for (int i = 0; i < length; ++i)
 			buf[i] = val[i];
 	}
 
-	bool cmp(Type b, CmpOP op) {
+	bool cmp(Type* b, CmpOP op) {
 		bool ok = false;
-		if (b.isChar()) {
-			CharType temp = (CharType)b;
+		if (b->isChar()) {
+			CharType* temp = (CharType*)b;
 			switch (op) {
 			case EQ:
-				if (b.getIsNull() || this->getIsNull())
+				if (b->getIsNull() || this->getIsNull())
 					break;
 				ok = equal(temp);
 				break;
 			case NE:
-				if (b.getIsNull() || this->getIsNull())
+				if (b->getIsNull() || this->getIsNull())
 					break;
 				ok = !equal(temp);
 				break;
 			case LT:
-				if (b.getIsNull() || this->getIsNull())
+				if (b->getIsNull() || this->getIsNull())
 					break;
 				ok = less(temp);
 				break;
 			case GT:
-				if (b.getIsNull() || this->getIsNull())
+				if (b->getIsNull() || this->getIsNull())
 					break;
-				ok = temp.less(*this);
+				ok = temp->less(this);
 				break;
 			case LE:
-				if (b.getIsNull() || this->getIsNull())
+				if (b->getIsNull() || this->getIsNull())
 					break;
 				ok = less(temp) | equal(temp);
 				break;
 			case GE:
-				if (b.getIsNull() || this->getIsNull())
+				if (b->getIsNull() || this->getIsNull())
 					break;
-				ok = temp.less(*this) | equal(temp);
+				ok = temp->less(this) | equal(temp);
 				break;
 			case NO:
 				ok = true;
@@ -538,7 +562,7 @@ public:
 			case ISNOTNULL:
 				ok = !getIsNull();
 				break;
-			case ISNOTNULL:
+			case ISNULL:
 				ok = getIsNull();
 				break;
 			case IN:
@@ -561,24 +585,41 @@ class VarcharType : public Type {
 	int length;
 	vector<char> val;
 
-	bool equal(VarcharType b) {
-		if (b.length != this->length)
+	bool equal(VarcharType* b) {
+		if (b->length != this->length)
 			return false;
 		for (int i = 0; i < length; ++i)
-			if (b.val[i] != this->val[i])
+			if (b->val[i] != this->val[i])
 				return false;
+		return true;
 	}
 
-	bool less(VarcharType b) {
+	bool less(VarcharType* b) {
 		string s1 = "";
 		string s2 = "";
 		for (int i = 0; i < length; ++i)
-			s1 += this.val[i];
-		for (int i = 0; i < b.length; ++i)
-			s2 += b.val[i];
+			s1 += this->val[i];
+		for (int i = 0; i < b->length; ++i)
+			s2 += b->val[i];
 		return s1 < s2;
 	}
 public:
+	VarcharType() {
+		maxlength = 0;
+		length = 0;
+		val.clear();
+	}
+
+	VarcharType(VarcharType* b) {
+		maxlength = b->maxlength;
+		length = b->length;
+		val.clear();
+		for (int i = 0; i < b->val.size(); ++i) {
+			val.push_back(b->val[i]);
+		}
+		this->setIsNull(b->getIsNull());
+	}
+
 	VarcharType(int len) {
 		maxlength = len;
 		val.clear();
@@ -590,12 +631,12 @@ public:
 	~VarcharType() {
 	}
 
-	int length() {
+	int getLength() {
 		return maxlength;
 	}
 
 	void fromChars(char* buf, int len) {
-		maxlength = len;
+		maxlength = len - 1;
 		length = (int)(buf[0]);
 		val.clear();
 		for (int i = 0; i < length; ++i) {
@@ -607,7 +648,7 @@ public:
 		return VARCHAR;
 	}
 
-	bool isVarChar() {
+	bool isVarchar() {
 		return true;
 	}
 
@@ -623,47 +664,46 @@ public:
 	}
 
 	void toChars(char* buf, int& len) {
-		len = length;
-		buf = new char[length + 1];
-		buf[0] = (char)len;
+		len = maxlength + 1;
+		buf[0] = (char)length;
 		for (int i = 0; i < length; ++i)
 			buf[i + 1] = val[i];
 	}
 
-	bool cmp(Type b, CmpOP op) {
+	bool cmp(Type* b, CmpOP op) {
 		bool ok = false;
-		if (b.isVarchar()) {
-			VarcharType temp = (VarcharType)b;
+		if (b->isVarchar()) {
+			VarcharType* temp = (VarcharType*)b;
 			switch (op) {
 			case EQ:
-				if (b.getIsNull() || this->getIsNull())
+				if (b->getIsNull() || this->getIsNull())
 					break;
 				ok = equal(temp);
 				break;
 			case NE:
-				if (b.getIsNull() || this->getIsNull())
+				if (b->getIsNull() || this->getIsNull())
 					break;
 				ok = !equal(temp);
 				break;
 			case LT:
-				if (b.getIsNull() || this->getIsNull())
+				if (b->getIsNull() || this->getIsNull())
 					break;
 				ok = less(temp);
 				break;
 			case GT:
-				if (b.getIsNull() || this->getIsNull())
+				if (b->getIsNull() || this->getIsNull())
 					break;
-				ok = temp.less(*this);
+				ok = temp->less(this);
 				break;
 			case LE:
-				if (b.getIsNull() || this->getIsNull())
+				if (b->getIsNull() || this->getIsNull())
 					break;
 				ok = less(temp) | equal(temp);
 				break;
 			case GE:
-				if (b.getIsNull() || this->getIsNull())
+				if (b->getIsNull() || this->getIsNull())
 					break;
-				ok = temp.less(*this) | equal(temp);
+				ok = temp->less(this) | equal(temp);
 				break;
 			case NO:
 				ok = true;
@@ -671,7 +711,7 @@ public:
 			case ISNOTNULL:
 				ok = !getIsNull();
 				break;
-			case ISNOTNULL:
+			case ISNULL:
 				ok = getIsNull();
 				break;
 			case IN:
@@ -691,12 +731,20 @@ public:
 // 小数，固定小数位数，总位数有限制
 class NumericType : public Type {
 	// TODO
-	Vector<int> num;
+	vector<int> num;
 	int allLength;
 	int backLength;
 
 
 public:
+	NumericType() {
+
+	}
+
+	NumericType(NumericType* b) {
+
+	}
+
 	AttrType getType() {
 		return NUMERIC;
 	}

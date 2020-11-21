@@ -3,6 +3,7 @@
 #ifndef RECORD_HPP
 #define RECORD_HPP
 
+#include <cstring>
 #include <iostream>
 using namespace std;
 

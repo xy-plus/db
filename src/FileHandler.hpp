@@ -4,6 +4,7 @@
 #include "../filesystem/bufmanager/BufPageManager.h"
 #include "PageInfo.hpp"
 #include "Record.hpp"
+#include <cstring>
 
 class FileHandler {
    private:
