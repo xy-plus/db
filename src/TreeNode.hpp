@@ -12,18 +12,32 @@
 using namespace std;
 
 int BTreeM = 5;
-int LIMIT = (BTreeM % 2) ? (M + 1) / 2 : M / 2;
+int LIMIT = (BTreeM % 2) ? (BTreeM + 1) / 2 : BTreeM / 2;
+
+bool equalRID(RecordID a, RecordID b) {
+	if ((a.page != b.page) || (a.slot != b.slot))
+		return false;
+	return true;
+}
 
 class TreeNode {
 public:
 	TreeNode() {
 		key.clear();
 		child.clear();
-		father = new RecordID(0, 0);
+		father.page = 0;
+		father.slot = 0;
 		isLeaf = true;
 	}
 
 	TreeNode(char* data) {
+		from_chars(data);
+	}
+
+	void from_chars(char* data) {
+		key.clear();
+		child.clear();
+
 		int keySize = ((int*)(data + offsetM))[0];
 		int num = ((int*)(data + offsetIsLeaf))[0];
 		if (num == 0) {
@@ -56,30 +70,30 @@ public:
 	}
 
 	void to_string(char* data) {
-		((int*)(buffer + offsetM))[0] = key.size();
-		((int*)(buffer + offsetIsLeaf))[0] = isLeaf;
-		((RecordID*)(buffer + offsetFather))[0] = father;
+		((int*)(data + offsetM))[0] = key.size();
+		((int*)(data + offsetIsLeaf))[0] = (int)isLeaf;
+		((RecordID*)(data + offsetFather))[0] = father;
 
-		RecordID * rbuf = (RecordID*)(buffer + offsetChild);
+		RecordID * rbuf = (RecordID*)(data + offsetChild);
 		for (int i = 0; i < child.size(); ++i)
 			rbuf[i] = child[i];
 
-		int attrLength = key[0].length();
+		int attrLength = 0;
+		if (key.size() > 0) {
+			attrLength = key[0].length();
+		}
 		int offset = offsetChild + child.size() * sizeof(RecordID);
-		((int*)(buffer + offset))[0] = attrLength;
+		((int*)(data + offset))[0] = attrLength;
 		offset = offset + sizeof(int);
 
 		int sumLen = offset;
 
-		char* cbuf = (char*)(buffer + offset);
+		char* cbuf = (char*)(data + offset);
 		for (int i = 0; i < key.size(); ++i) {
-			memcpy(cbuf, keys[i].toString().c_str(), (size_t)attrLength);
+			memcpy(cbuf, key[i].toString().c_str(), (size_t)attrLength);
 			cbuf += attrLength;
 			sumLen += attrLength;
 		}
-		data = new char[4096];
-		for (int i = 0; i < sumLen; ++i)
-			data[i] = buffer[i];
 	}
 
 	int getKeyNum() {
@@ -142,6 +156,10 @@ public:
 		this->father = father;
 	}
 
+	bool getIsLeaf() {
+		return this->isLeaf;
+	}
+
 	void setIsLeaf(bool isLeaf) {
 		this->isLeaf = isLeaf;
 	}
@@ -161,21 +179,21 @@ public:
 	void pop_front(RecordID & rID, Value & k) {
 		rID = child.front();
 		k = key.front();
-		child.erase(0);
-		key.erase(0);
+		child.erase(child.begin());
+		key.erase(key.begin());
 	}
 
 	void deleteKey(int i) {
-		key.erase(i);
+		key.erase(key.begin() + i);
 	}
 
 	void deleteChild(int i) {
-		child.erase(i);
+		child.erase(child.begin() + i);
 	}
 
 	int findChild(RecordID cID) {
 		for (int i = 0; i < child.size(); ++i) {
-			if (child[i] == cID) {
+			if (equalRID(child[i], cID)) {
 				return i;
 			}
 		}
@@ -192,7 +210,6 @@ private:
 	static const int offsetIsLeaf = sizeof(int) + offsetM;
 	static const int offsetFather = sizeof(int) + offsetIsLeaf;
 	static const int offsetChild = sizeof(RecordID) + offsetFather;
-	static char buffer[MAX_RECORD_SIZE];
 
 	friend class BTree;
 };

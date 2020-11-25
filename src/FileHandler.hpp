@@ -66,6 +66,8 @@ class FileHandler {
         int pageIndex = metadata->nextAvailPage, index;
         PageInfo* pg = (PageInfo*)getPage(pageIndex, index);
         int availSlot = pg->getNextAvailSlot();
+		int allocPage = metadata->nextAvailPage;
+		int allocSlot = availSlot;
         memcpy(pg->data + metadata->recordLength * availSlot, record,
                metadata->recordLength * sizeof(uint));
         pg->setSlot(availSlot);
@@ -82,10 +84,12 @@ class FileHandler {
                 metadata->nextAvailPage = new_pg->pageNumber =
                     metadata->pageCount++;
                 new_pg->nextAvailPage = 0;
+				for (int i = 0; i < 62; ++i)
+					new_pg->bitmap[i] = 0u;
             } else
                 metadata->nextAvailPage = pg->nextAvailPage;
         }
-        return RecordID(metadata->nextAvailPage, availSlot);
+		return RecordID(allocPage, allocSlot);
     }
 
     /* 返回符合条件(check retrun true)的结果数量

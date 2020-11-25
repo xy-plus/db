@@ -3,6 +3,7 @@
 #include "FileHandler.hpp"
 #include "utils.h"
 #include "Types.hpp"
+#include "Value.hpp"
 #include "TreeNode.hpp"
 #include "../filesystem/fileio/FileManager.h"
 #include "../filesystem/utils/MyHashMap.h"
@@ -13,27 +14,23 @@
 using namespace std;
 
 class BTree {
-	// TODO : uodata record & vector<Type*>
+	// TODO : uodata record
 public:
-	BTree(BufPageManager* bpm, FileManager* fm) {
-		this.bpm = bpm;
-		this.fm = fm;
+	BTree(FileHandler* fileHandler) {
+		this->fileHandler = fileHandler;
 	}
 
-	~BTree() {
-	}
-
-	bool update_Record(RecordID rid, RecordID newrid, vector<Type*> oldVal, vector<Type*> newVal) {
+	bool update_Record(RecordID rid, RecordID newrid, vector<Type> oldVal, vector<Type> newVal) {
 		Value oldKey;
 		Value newKey;
 		oldKey.setVals(oldVal);
 		newKey.setVals(newVal);
 		RecordID oldID;
 		if (searchNode(root, oldKey, oldID)) {
-			if (oldID == rid) {
+			if (equalRID(oldID, rid)) {
 				if (!searchNode(root, newKey, oldID)) {
 					deleteNode(root, oldKey);
-					insertNode(root, rid, newKey);
+					insertNode(root, newrid, newKey);
 				} else {
 					// has the same new key
 					return false;
@@ -49,7 +46,7 @@ public:
 		return true;
 	}
 
-	bool insert_Record(RecordID rid, vector<Type*> vals) {
+	bool insert_Record(RecordID rid, vector<Type> vals) {
 		// new Record
 		Value newKey;
 		newKey.setVals(vals);
@@ -63,13 +60,13 @@ public:
 		return true;
 	}
 
-	bool delete_Record(vector<Type*> vals) {
+	bool delete_Record(vector<Type> vals) {
 		Value oldKey;
 		oldKey.setVals(vals);
 		return deleteNode(root, oldKey);
 	}
 
-	vector<RecordID> find_Record(vector<Type*> vals, vector<CmpOP> ops) {
+	vector<RecordID> find_Record(vector<Type> vals, vector<CmpOP> ops) {
 		Value key;
 		key.setVals(vals);
 		return findNode(root, key, ops);
@@ -80,7 +77,7 @@ public:
 	}
 
 private:
-	friend class IndexHandler;
+	friend class IndexManager;
 	RecordID root;
 	int num;
 
@@ -88,13 +85,11 @@ private:
 	vector<AttrType> attrTypes;
 	vector<int> attrLen;
 
-	FileManager* fm;
-	BufPageManager* bpm;
 	FileHandler* fileHandler;
 
 	bool compare(Value a, Value b, CmpOP op) {
-		int len = a.legnth();
-		if (b.legnth() != len) {
+		int len = a.size();
+		if (b.size() != len) {
 			return false;
 		} else {
 			for (int i = 0; i < len; ++i) {
@@ -105,6 +100,12 @@ private:
 				}
 			}
 		}
+		return true;
+	}
+
+	bool checkType(Value a) {
+		// TODO
+		
 		return true;
 	}
 
@@ -120,41 +121,35 @@ private:
 	}
 
 	void getInfo(char* data) {
-		data = new char[4096];
-		int size;
-		getMetaData((uint*)data, size);
+		getMetaData((uint*)data);
 	}
 
-	void setInfo(uint* data, int size) {
-		setMetadata(data, size);
+	void setInfo(uint* data) {
+		setMetadata(data);
 	}
 
-	void setMetadata(uint* data, int size) {
+	void setMetadata(uint* data) {
 		num = (int)data[0];
-		int page = (int)data[1];
-		int slot = (int)data[2];
-		root = new RecordID(page, slot);
+		root.page = (int)data[1];
+		root.slot = (int)data[2];
 		numAttr = (int)data[3];
 		for (int i = 0; i < numAttr; ++i) {
-			int a, b;
-			a = (AttrType)data[4 + i * 2];
-			b = (int)data[5 + i * 2];
-			attrTypes.push_back(a);
+			int a = (int)data[4 + i * 2];
+			int b = (int)data[5 + i * 2];
+			attrTypes.push_back((AttrType)a);
 			attrLen.push_back(b);
 		}
 	}
 
-	void getMetaData(uint* data, int& size) {
-		data = new uint[4096];
+	void getMetaData(uint* data) {
 		data[0] = (uint)num;
 		data[1] = (uint)root.page;
 		data[2] = (uint)root.slot;
-		data[2] = (uint)numAttr;
+		data[3] = (uint)numAttr;
 		for (int i = 0; i < numAttr; ++i) {
 			data[4 + i * 2] = (uint)attrTypes[i];
 			data[5 + i * 2] = (uint)attrLen[i];
 		}
-		size = 4096;
 	}
 
 	TreeNode* getNode(RecordID rid) {
@@ -170,15 +165,26 @@ private:
 	}
 
 	void saveNode(RecordID rid, TreeNode* temp) {
-		BufType record;
-		temp->to_string((char*)record);
-		fileHandler->modifyRecord(rid, record);
+		char* buffer = new char[4096];
+		temp->to_string(buffer);
+		fileHandler->modifyRecord(rid, (BufType)buffer);
+		delete[] buffer;
+	}
+
+	RecordID newNode() {
+		char* buffer = new char[4096];
+		TreeNode* temp = new TreeNode();
+		temp->to_string(buffer);
+		RecordID metaID = fileHandler->insertRecord((BufType)buffer);
+		delete temp;
+		delete[] buffer;
+		return metaID;
 	}
 
 	bool getPrevNode(RecordID now, RecordID& prev) {
 		TreeNode* temp = getNode(now);
 		RecordID fID = temp->getFather();
-		if (fID.page != -1) {
+		if (fID.page != 0) {
 			TreeNode* father = getNode(fID);
 			int k = father->findChild(now);
 			if (k > 0) {
@@ -187,15 +193,17 @@ private:
 			} else {
 				return false;
 			}
+			delete father;
 		} else {
 			return false;
 		}
+		delete temp;
 	}
 
 	bool getSuccNode(RecordID now, RecordID& succ) {
 		TreeNode* temp = getNode(now);
 		RecordID fID = temp->getFather();
-		if (fID.page != -1) {
+		if (fID.page != 0) {
 			TreeNode* father = getNode(fID);
 			int k = father->findChild(now);
 			if (k < father->getKeyNum() - 1) {
@@ -204,30 +212,36 @@ private:
 			} else {
 				return false;
 			}
+			delete father;
 		} else {
 			return false;
 		}
+		delete temp;
 	}
 
-	vector<RecordID> findNode(RecordID now, Value key, Vector<CmpOP> ops) {
+	vector<RecordID> findNode(RecordID now, Value key, vector<CmpOP> ops) {
 		TreeNode* temp = getNode(now);
 		vector<RecordID> ans;
 		ans.clear();
-		if (temp.isLeaf) {
-			int keyNum = temp.getKeyNum();
+		if (temp->isLeaf) {
+			int keyNum = temp->getKeyNum();
 			for (int i = 0; i < keyNum; ++i) {
 				Value val = temp->getKey(i);
-				if (val.check(key, ops) == 0) {
+				if (val.check(key, ops)) {
 					ans.push_back(temp->getChild(i));
 				}
 			}
 		} else {
-			int keyNum = temp.getKeyNum();
+			int keyNum = temp->getKeyNum();
 			int addr = keyNum - 1;
+			bool last = true;
+			bool next = false;
 			for (int i = 0; i < keyNum; ++i) {
 				// TODO
 				Value val = temp->getKey(i);
-				if (val.cmp(key, ops) >= 1) {
+				last = next;
+				next = val.cmp(key, ops);
+				if (last | next) {
 					vector<RecordID> tempAns = findNode(temp->getChild(i), key, ops);
 					for (int j = 0; j < tempAns.size(); ++j) {
 						ans.push_back(tempAns[j]);
@@ -235,22 +249,23 @@ private:
 				}
 			}
 		}
+		delete temp;
 		return ans;
 	}
 
 	bool searchNode(RecordID now, Value key, RecordID &rID) {
 		TreeNode* temp = getNode(now);
-		if (temp.isLeaf) {
-			int keyNum = temp.getKeyNum();
+		if (temp->isLeaf) {
+			int keyNum = temp->getKeyNum();
 			for (int i = 0; i < keyNum; ++i) {
 				if (compare(key, temp->getKey(i), EQ)) {
-					rID = temp.getChild(i);
+					rID = temp->getChild(i);
 					return true;
 				}
 			}
 		}
 		else {
-			int keyNum = temp.getKeyNum();
+			int keyNum = temp->getKeyNum();
 			int addr = keyNum - 1;
 			for (int i = 0; i < keyNum; ++i) {
 				if (compare(key, temp->getKey(i), LE)) {
@@ -264,6 +279,7 @@ private:
 				return true;
 			}
 		}
+		delete temp;
 		return false;
 	}
 
@@ -280,7 +296,7 @@ private:
 			}
 			temp->insertKey(addr, newValue);
 			temp->insertChild(addr, recordID);
-			save(now, temp);
+			saveNode(now, temp);
 		}
 		else {
 			int keyNum = temp->getKeyNum();
@@ -292,44 +308,62 @@ private:
 				}
 			}
 			bool answer = insertNode(temp->getChild(addr), recordID, newValue);
-
 			if (answer == false) {
+				delete temp;
 				return false;
 			}
 		}
+		delete temp;
+
 		// 更新father的key
 		temp = getNode(now);
-		RecordID fID = temp.getFather();
-		if (fID.page != -1) {
+		RecordID fID = temp->getFather();
+		if (fID.page != 0) {
 			TreeNode* father = getNode(fID);
 			int k = father->findChild(now);
 			father->modifyKey(k, temp->getKey(temp->getKeyNum() - 1));
 			saveNode(fID, father);
+			delete father;
 		}
 		if (temp->getKeyNum() > BTreeM) {
-			if (fID.page == -1) {
+			if (fID.page == 0) {
 				// split root
 				RecordID lID = newNode();
 				RecordID rID = newNode();
+
 				TreeNode* newLeft = getNode(lID);
 				TreeNode* newRight = getNode(rID);
 				for (int i = 0; i < temp->getKeyNum(); ++i) {
 					RecordID cID = temp->getChild(i);
-					TreeNode* temp_c = getNode(cID);
-					if (i < LIMIT) {
-						newLeft->insertKey(i, temp->getKey(i));
-						newLeft->insertChild(i, cID);
-						temp_c->setFather(lID);
-						saveNode(cID, temp_c);
-					} else {
-						newRight->insertKey(i - LIMIT, temp->getKey(i));
-						newRight->insertChild(i - LIMIT, cID);
-						temp_c->setFather(rID);
-						saveNode(cID, temp_c);
+					if (temp->isLeaf) {
+						if (i < LIMIT) {
+							newLeft->insertKey(i, temp->getKey(i));
+							newLeft->insertChild(i, cID);
+						}
+						else {
+							newRight->insertKey(i - LIMIT, temp->getKey(i));
+							newRight->insertChild(i - LIMIT, cID);
+						}
+					}
+					else {
+						TreeNode* temp_c = getNode(cID);
+						if (i < LIMIT) {
+							newLeft->insertKey(i, temp->getKey(i));
+							newLeft->insertChild(i, cID);
+							temp_c->setFather(lID);
+							saveNode(cID, temp_c);
+						}
+						else {
+							newRight->insertKey(i - LIMIT, temp->getKey(i));
+							newRight->insertChild(i - LIMIT, cID);
+							temp_c->setFather(rID);
+							saveNode(cID, temp_c);
+						}
+						delete temp_c;
 					}
 				}
 				int k1 = LIMIT - 1;
-				int k2 = temp->getKeyNum - LIMIT;
+				int k2 = temp->getKeyNum() - LIMIT - 1;
 
 				newLeft->setFather(now);
 				newRight->setFather(now);
@@ -344,6 +378,9 @@ private:
 				saveNode(now, temp);
 				saveNode(lID, newLeft);
 				saveNode(rID, newRight);
+
+				delete newLeft;
+				delete newRight;
 			} else {
 				RecordID bro;
 				TreeNode* temp_bro;
@@ -356,22 +393,29 @@ private:
 						RecordID tID;
 						Value tKey;
 						temp->pop_front(tID, tKey);
-						TreeNode* temp_c = getNode(tID);
-						temp_c->setFather(bro);
+						
+						if (!temp->isLeaf) {
+							TreeNode* temp_c = getNode(tID);
+							temp_c->setFather(bro);
+							saveNode(tID, temp_c);
+							delete temp_c;
+						}
 
 						int k = temp_bro->getKeyNum();
 						temp_bro->insertChild(k, tID);
 						temp_bro->insertKey(k, tKey);
 
 						TreeNode* father = getNode(fID);
-						int k = father->findChild(bro);
+						k = father->findChild(bro);
 						father->modifyKey(k, tKey);
 
 						saveNode(fID, father);
 						saveNode(now, temp);
 						saveNode(bro, temp_bro);
-						saveNode(tID, temp_c);
+
+						delete father;
 					}
+					delete temp_bro;
 				}
 				if (ok == false) {
 					if (getSuccNode(now, bro)) {
@@ -382,8 +426,13 @@ private:
 							RecordID tID;
 							Value tKey;
 							temp->pop_back(tID, tKey);
-							TreeNode* temp_c = getNode(tID);
-							temp_c->setFather(bro);
+
+							if (!temp->isLeaf) {
+								TreeNode* temp_c = getNode(tID);
+								temp_c->setFather(bro);
+								saveNode(tID, temp_c);
+								delete temp_c;
+							}
 
 							temp_bro->insertChild(0, tID);
 							temp_bro->insertKey(0, tKey);
@@ -395,8 +444,10 @@ private:
 							saveNode(fID, father);
 							saveNode(now, temp);
 							saveNode(bro, temp_bro);
-							saveNode(tID, temp_c);
+
+							delete father;
 						}
+						delete temp_bro;
 					}
 				}
 				if (ok == false) {
@@ -404,15 +455,19 @@ private:
 					RecordID lID = newNode();
 					TreeNode* newLeft = getNode(lID);
 
-					for (int i = 0; i < Limit; ++i) {
+					for (int i = 0; i < LIMIT; ++i) {
 						RecordID cID = temp->getChild(i);
-						TreeNode* temp_c = getNode(cID);
+
+						if (!temp->isLeaf) {
+							TreeNode* temp_c = getNode(cID);
+							temp_c->setFather(lID);
+							saveNode(cID, temp_c);
+							delete temp_c;
+						}
 						newLeft->insertKey(i, temp->getKey(i));
 						newLeft->insertChild(i, cID);
-						temp_c->setFather(lID);
-						saveNode(cID, temp_c);
 					}
-					for (int i = 0; i < Limit; ++i) {
+					for (int i = 0; i < LIMIT; ++i) {
 						newLeft->deleteKey(0);
 						newLeft->deleteChild(0);
 					}
@@ -430,59 +485,68 @@ private:
 						saveNode(lID, newLeft);
 						saveNode(fID, father);
 					}
+
+					delete father;
+					delete newLeft;
 				}
 			}
 		}
+		delete temp;
 		return true;
 	}
 
 	bool deleteNode(RecordID now, Value newValue) {
 		TreeNode* temp = getNode(now);
 		if (temp->isLeaf) {
-			int keyNum = temp.getKeyNum();
+			int keyNum = temp->getKeyNum();
 			int addr = -1;
 			for (int i = 0; i < keyNum; ++i) {
-				if (cmp(newValue, temp->getKey(i), EQ)) {
+				if (compare(newValue, temp->getKey(i), EQ)) {
 					addr = i;
 					break;
 				}
 			}
 			if (addr == -1) {
+				delete temp;
 				return false;
 			}
 			temp->deleteKey(addr);
 			temp->deleteChild(addr);
-			save(now, temp);
+			saveNode(now, temp);
 		}
 		else {
-			int keyNum = temp.getKeyNum();
+			int keyNum = temp->getKeyNum();
 			int addr = -1;
 			for (int i = 0; i < keyNum; ++i) {
-				if (cmp(newValue, temp->getKey(i), LE)) {
+				if (compare(newValue, temp->getKey(i), LE)) {
 					addr = i;
 					break;
 				}
 			}
 			if (addr == -1) {
+				delete temp;
 				return false;
 			}
-			bool answer = insertNode(temp->getChild(addr), recordID, newValue);
+			bool answer = deleteNode(temp->getChild(addr), newValue);
 
 			if (answer == false) {
+				delete temp;
 				return false;
 			}
 		}
+		delete temp;
 		// 更新father的key
 		temp = getNode(now);
-		RecordID fID = temp.getFather();
-		if (fID.page != -1 && temp->getKeyNum() > 0) {
+		RecordID fID = temp->getFather();
+		if (fID.page != 0 && temp->getKeyNum() > 0) {
 			TreeNode* father = getNode(fID);
 			int k = father->findChild(now);
 			father->modifyKey(k, temp->getKey(temp->getKeyNum() - 1));
 			saveNode(fID, father);
+			delete father;
 		}
 		if (temp->getKeyNum() < LIMIT) {
-			if (fID.page == -1) {
+			if (fID.page == 0) {
 				// 一般不处理，只有root child为空时重设为leaf
 				if (temp->getKeyNum() == 0) {
 					temp->isLeaf = true;
@@ -490,112 +554,19 @@ private:
 				}
 			}
 			else {
-				RecordID bro;
-				TreeNode* temp_bro;
-				// TODO : only empty will delete
-				bool ok = false;
-				if (getPrevNode(now, bro)) {
-					temp_bro = getNode(bro);
-					if (temp_bro->getKeyNum() > LIMIT) {
-						ok = true;
-						// move left back to front
-						RecordID tID;
-						Value tKey;
-						temp_bro->pop_back(tID, tKey);
-						TreeNode* temp_c = getNode(tID);
-						temp_c->setFather(now);
+				if (temp->getKeyNum() == 0) {
+					// keys number = 0,need to delete from father
+					TreeNode* father = getNode(fID);
+					int k = father->findChild(now);
+					father->deleteChild(k);
+					father->deleteKey(k);
+					saveNode(fID, father);
 
-						temp->insertChild(0, tID);
-						temp->insertKey(0, tKey);
-
-						TreeNode* father = getNode(fID);
-						int k = father->findChild(bro);
-						father->modifyKey(k, temp_bro->getKey(temp_bro->getKeyNum()));
-
-						saveNode(fID, father);
-						saveNode(now, temp);
-						saveNode(bro, temp_bro);
-						saveNode(tID, temp_c);
-					}
-				}
-				if (ok == false) {
-					if (getSuccNode(now, bro)) {
-						temp_bro = getNode(bro);
-						if (temp_bro->getKeyNum() > LIMIT) {
-							ok = true;
-							// move right fornt to back
-							RecordID tID;
-							Value tKey;
-							temp_bro->pop_front(tID, tKey);
-							TreeNode* temp_c = getNode(tID);
-							temp_c->setFather(now);
-
-							int k = temp->getKeyNum();
-							temp->insertChild(k, tID);
-							temp->insertKey(k, tKey);
-
-							TreeNode* father = getNode(fID);
-							k = father->findChild(now);
-							father->modifyKey(k, tKey);
-
-							saveNode(fID, father);
-							saveNode(now, temp);
-							saveNode(bro, temp_bro);
-							saveNode(tID, temp_c);
-						}
-					}
-				}
-				if (ok == false) {
-					if (getPrevNode(now, bro)) {
-						// combine bro to now
-						temp_bro = getNode(bro);
-						for (int i = 0; i < temp_bro->getKeyNum(); ++i) {
-							RecordID cID = temp_bro->getChild(i);
-							TreeNode* temp_c = getNode(cID);
-							temp->insertKey(0, temp_bro->getKey(i));
-							temp->insertChild(0, cID);
-							temp_c->setFather(now);
-							saveNode(cID, temp_c);
-						}
-
-						TreeNode* father = getNode(fID);
-						int k = father->findChild(bro);
-						father->deleteChild(k);
-						father->deleteKey(k);
-						saveNode(fID, father);
-						saveNode(now, temp);
-					} else if (getSuccNode(now, bro)) {
-						// combine now to bro
-						temp_bro = getNode(bro);
-						for (int i = 0; i < temp->getKeyNum(); ++i) {
-							RecordID cID = temp->getChild(i);
-							TreeNode* temp_c = getNode(cID);
-
-							temp_bro->insertKey(0, temp->getKey(i));
-							temp_bro->insertChild(0, cID);
-
-							temp_c->setFather(bro);
-							saveNode(cID, temp_c);
-						}
-
-						TreeNode* father = getNode(fID);
-						int k = father->findChild(now);
-						father->deleteChild(k);
-						father->deleteKey(k);
-						saveNode(fID, father);
-						saveNode(bro, temp_bro);
-					}
-					else if (temp->getKeyNum() == 0) {
-						// keys number = 0,need to delete from father
-						TreeNode* father = getNode(fID);
-						int k = father->findChild(now);
-						father->deleteChild(k);
-						father->deleteKey(k);
-						saveNode(fID, father);
-					}
+					delete father;
 				}
 			}
 		}
+		delete temp;
 		return true;
 	}
 };
