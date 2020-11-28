@@ -26,6 +26,9 @@ public:
 		oldKey.setVals(oldVal);
 		newKey.setVals(newVal);
 		RecordID oldID;
+		if (checkType(newKey) == false) {
+			return false;
+		}
 		if (searchNode(root, oldKey, oldID)) {
 			if (equalRID(oldID, rid)) {
 				if (!searchNode(root, newKey, oldID)) {
@@ -51,6 +54,9 @@ public:
 		Value newKey;
 		newKey.setVals(vals);
 		RecordID oldID;
+		if (checkType(newKey) == false) {
+			return false;
+		}
 		if (!searchNode(root, newKey, oldID)) {
 			insertNode(root, rid, newKey);
 		} else {
@@ -95,7 +101,7 @@ private:
 			for (int i = 0; i < len; ++i) {
 				Type a0 = a.getVal(i);
 				Type b0 = b.getVal(i);
-				if (!a0.cmp(b0, op)) {
+				if (!a0.cmp(b0, op, false)) {
 					return false;
 				}
 			}
@@ -104,8 +110,20 @@ private:
 	}
 
 	bool checkType(Value a) {
-		// TODO
-		
+		// TODO Numeric
+		if (a.size() != numAttr) {
+			return false;
+		}
+		for (int i = 0; i < numAttr; ++i) {
+			Type temp = a.getVal(i);
+			if (temp.getType() != attrTypes[i])
+				return false;
+			if (attrTypes[i] == CHAR | attrTypes[i] == VARCHAR) {
+				if (attrLen[i] != temp.getLen()) {
+					return false;
+				}
+			}
+		}
 		return true;
 	}
 
@@ -439,7 +457,7 @@ private:
 
 							TreeNode* father = getNode(fID);
 							int k = father->findChild(now);
-							father->modifyKey(k, temp->getKey(temp->getKeyNum()));
+							father->modifyKey(k, temp->getKey(temp->getKeyNum() - 1));
 
 							saveNode(fID, father);
 							saveNode(now, temp);

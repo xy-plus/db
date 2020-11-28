@@ -99,10 +99,10 @@ public:
 		case GE:
 		case LT:
 		case GT:
-			ok = this->vals[0].cmp(b.vals[0], ops[0]);
+			ok = this->vals[0].cmp(b.vals[0], ops[0], false);
 			break;
 		case EQ:
-			ok = this->vals[0].cmp(b.vals[0], GE);
+			ok = this->vals[0].cmp(b.vals[0], GE, false);
 			break;
 		default:
 			// isnull、isnotnull、ne、in、no不能用于排序，默认符合
@@ -113,7 +113,7 @@ public:
 
 	bool check(Value b, vector<CmpOP> ops) {
 		for (int i = 0; i < vals.size(); ++i) {
-			if (!vals[i].cmp(b.vals[i], ops[i])) {
+			if (!vals[i].cmp(b.vals[i], ops[i], true)) {
 				return false;
 			}
 		}

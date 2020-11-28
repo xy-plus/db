@@ -49,6 +49,11 @@ class Type {
 	}
 	   	  
 	bool equal(Type b) {
+		if (this->getIsNull() != b.getIsNull())
+			return false;
+		if (this->getIsNull())
+			return true;
+
 		if (b.type != this->type)
 			return false;
 		switch (type) {
@@ -92,6 +97,11 @@ class Type {
 	}
 
 	bool less(Type b) {
+		if (b.getIsNull())
+			return false;
+		if (this->getIsNull())
+			return true;
+
 		if (b.type != this->type)
 			return false;
 		string s1 = "";
@@ -389,6 +399,10 @@ public:
 		}
 	}
 
+	int getLen() {
+		return num[0];
+	}
+
 	// TODO : NUMERIC
 
 	void setAttrType(AttrType tp) {
@@ -490,37 +504,37 @@ public:
 		return false;
 	}
 
-	bool cmp(Type b, CmpOP op) {
+	bool cmp(Type b, CmpOP op, bool checked) {
 		bool ok = false;
 		if (b.type == this->type) {
 			switch (op) {
 			case EQ:
-				if (b.getIsNull() || this->getIsNull())
+				if ((checked) && (b.getIsNull() || this->getIsNull()))
 					break;
 				ok = equal(b);
 				break;
 			case NE:
-				if (b.getIsNull() || this->getIsNull())
+				if ((checked) && (b.getIsNull() || this->getIsNull()))
 					break;
 				ok = !equal(b);
 				break;
 			case LT:
-				if (b.getIsNull() || this->getIsNull())
+				if ((checked) && (b.getIsNull() || this->getIsNull()))
 					break;
 				ok = less(b);
 				break;
 			case GT:
-				if (b.getIsNull() || this->getIsNull())
+				if ((checked) && (b.getIsNull() || this->getIsNull()))
 					break;
 				ok = !(less(b) | equal(b));
 				break;
 			case LE:
-				if (b.getIsNull() || this->getIsNull())
+				if ((checked) && (b.getIsNull() || this->getIsNull()))
 					break;
 				ok = less(b) | equal(b);
 				break;
 			case GE:
-				if (b.getIsNull() || this->getIsNull())
+				if ((checked) && (b.getIsNull() || this->getIsNull()))
 					break;
 				ok = !less(b);
 				break;
