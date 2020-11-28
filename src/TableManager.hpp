@@ -4,8 +4,7 @@
 #include "Record.hpp"
 #include "FileHandler.hpp"
 #include "utils.h"
-#include "Types.hpp"
-#include "BTree.hpp"
+#include "Table.hpp"
 #include <vector>
 
 using namespace std;
@@ -44,83 +43,46 @@ public:
 		this->fm = fm;
 	}
 
-	bool create_index(const char* fileName, vector<int> indexNo, vector<AttrType> attrType, vector<int> attrLen) {
-		int num = indexNo.size();
-		if (attrType.size() != num) {
-			return false;
-		}
-		if (attrLen.size() != num) {
-			return false;
-		}
-		string newFile = string(fileName);
-		for (int i = 0; i < num; ++i) {
-			newFile = newFile + '_' + to_string(indexNo[i]);
-		}
+	bool create_index(const char* fileName, vector<Line> lines, vector<string> primaryKey) {
 		// create file
-		// TODO : ÐÞ¸ÄallLength
-		int allLength = 4096 / 4;
-		int fileID = create_file(newFile.c_str(), allLength);
+		int allLength = 1024;
+		int fileID = create_file(fileName, allLength);
 
 		// set Index info and root
 		FileHandler* fileHandler = new FileHandler(bpm, fileID);
 		char* data;
-		BTree* temp = new BTree(fileHandler);
-		RecordID rID(0, 0);
-		RecordID metaID(1, 0);
-		TreeNode* root = new TreeNode();
-		temp->setAttrs(attrType, attrLen);
-		temp->setRoot(rID);
 
+		Table* temp = new Table(fileHandler);
+		temp.setAttrs(lines);
+		temp.setprimartKey(primaryKey);
+		RecordID metaID(1, 0);
+		
 		// alloc metadata space and get metadata ID
 		data = new char[4096];
-		temp->getInfo(data);
+		temp->getMetadata(data);
 		metaID = fileHandler->insertRecord((BufType)data);
 		delete[] data;
 
-		// alloc root node space and get root ID
-		data = new char[4096];
-		root->to_string(data);
-		rID = fileHandler->insertRecord((BufType)data);
-		delete[] data;
-		delete root;
-
-		// updata root to medatada
-		data = new char[4096];
-		temp->setRoot(rID);
-		temp->getInfo(data);
-		fileHandler->modifyRecord(metaID, (BufType)data);
-		delete[] data;
 		delete temp;
 		return true;
 	}
 
-	bool delete_index(const char* fileName, vector<int> indexNo) {
-		int num = indexNo.size();
-		string newFile = string(fileName);
-		for (int i = 0; i < num; ++i) {
-			newFile = newFile + '_' + to_string(indexNo[i]);
-		}
+	bool delete_index(const char* fileName) {
 		// TODO : delete file
 		return true;
 	}
 
-	bool open_index(const char* fileName, vector<int> indexNo, BTree **bTree) {
-		int num = indexNo.size();
-		string newFile = string(fileName);
-		for (int i = 0; i < num; ++i) {
-			newFile = newFile + '_' + to_string(indexNo[i]);
-		}
-
+	bool open_index(const char* fileName, vector<int> indexNo, BTree** bTree) {
 		int fileID;
-		fm->openFile(newFile.c_str(), fileID);
+		fm->openFile(fileName, fileID);
 		FileHandler* fileHandler = new FileHandler(bpm, fileID);
 
 		// read No.1 record , set the bTree metadata
 		RecordID index(1, 0);
 		Record rec;
 		fileHandler->getRecordById(index, rec);
-		BTree* temp = new BTree(fileHandler);
-		temp->setInfo(rec.getData());
+		Table* temp = new Table(fileHandler);
+		temp->setMetadata(rec.getData());
 		*bTree = temp;
 		return true;
 	}
