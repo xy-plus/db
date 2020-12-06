@@ -255,7 +255,6 @@ private:
 			bool last = true;
 			bool next = false;
 			for (int i = 0; i < keyNum; ++i) {
-				// TODO
 				Value val = temp->getKey(i);
 				last = next;
 				next = val.cmp(key, ops);
