@@ -4,16 +4,17 @@
 #include "../filesystem/bufmanager/BufPageManager.h"
 #include "PageInfo.hpp"
 #include "Record.hpp"
-#include <cstring>
 
 class FileHandler {
-   private:
+private:
     MetadataPageInfo* metadata;  // 元数据页
     int metadata_index;          // 元数据在文件系统中的页号
     BufPageManager* bpm;         // 文件对应的缓冲区
     int fileID;                  // 文件 id
+	bool isOpened;
 
-   public:
+public:
+	FileHandler(): isOpened(false){}
     FileHandler(BufPageManager* bpm_, int fileID_)
         : bpm(bpm_), fileID(fileID_) {
         metadata = (MetadataPageInfo*)bpm->getPage(
@@ -21,17 +22,18 @@ class FileHandler {
         bpm->access(metadata_index);
     }
 
+	int getFileID() const { return fileID; }
+
     /* 获取一个页面的首地址
      * 如果有读/写操作，不要忘记通过设置
      * bpm->markDirty(index) 或 bpm->access(index)
      */
-    BufType getPage(int pageID, int& index) {
+    BufType getPage(int pageID, int& index) const {
         return bpm->getPage(fileID, pageID, index);
     }
 
     // 通过 id 找 record
-    bool getRecordById(RecordID rid, Record& rec) {
-        assert(rid.page != 0);
+    bool getRecordById(RecordID rid, Record& rec) const {
         int index;
         PageInfo* pg = (PageInfo*)getPage(rid.page, index);
         if (pg->checkSlot(rid.slot)) {
@@ -126,6 +128,12 @@ class FileHandler {
             return false;
         }
     }
+
+	bool isOpen() const { return isOpened; }
+
+	void release() {
+		isOpened = false;
+	}
 };
 
 #endif

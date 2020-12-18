@@ -9,6 +9,7 @@
 #include <fcntl.h>
 #include "../utils/pagedef.h"
 #include "../utils/MyBitMap.h"
+#include "../../src/global.h"
 using namespace std;
 class FileManager {
 private:
@@ -118,6 +119,27 @@ public:
 		fm->setBit(fileID, 0);
 		_openFile(name, fileID);
 		return true;
+	}
+
+	int destroyFile(const char* name) {
+		if (remove(name)) {
+			cout << "fail" << endl;
+			return RETVAL_ERR;
+		}
+		else {
+			return RETVAL_OK;
+		}
+
+	}
+
+	int renameFile(const char *nameA, const char *nameB) {
+		if (rename(nameA, nameB)) {
+			cout << "fail" << endl;
+			return RETVAL_ERR;
+		}
+		else {
+			return RETVAL_OK;
+		}
 	}
 	int newType() {
 		int t = tm->findLeftOne();

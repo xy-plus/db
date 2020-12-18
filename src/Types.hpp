@@ -363,7 +363,7 @@ public:
 			if (tp == 0) opt = true;
 			  else opt = false;
 			for (int i = 0; i < num[0]; ++i)
-				numeric[i].push_back((int)buf[3 + i]);
+				numeric.push_back((int)buf[3 + i]);
 			break;
 		default:
 			break;

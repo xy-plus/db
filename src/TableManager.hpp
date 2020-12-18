@@ -9,7 +9,7 @@
 
 using namespace std;
 
-class IndexManager {
+class TableManager {
 	FileManager* fm;
 	BufPageManager* bpm;
 
@@ -38,12 +38,12 @@ class IndexManager {
 	}
 
 public:
-	IndexManager(BufPageManager* bpm, FileManager* fm) {
+	TableManager(BufPageManager* bpm, FileManager* fm) {
 		this->bpm = bpm;
 		this->fm = fm;
 	}
 
-	bool create_index(const char* fileName, vector<Line> lines, vector<string> primaryKey) {
+	bool create_table(const char* fileName, vector<Line> lines, vector<string> primaryKey) {
 		// create file
 		int allLength = 1024;
 		int fileID = create_file(fileName, allLength);

@@ -2,9 +2,8 @@
 
 #ifndef RECORD_HPP
 #define RECORD_HPP
-
-#include <cstring>
 #include <iostream>
+
 using namespace std;
 
 struct RecordID {
@@ -12,6 +11,8 @@ struct RecordID {
 
     RecordID(uint page_, uint slot_) : page(page_), slot(slot_) {}
     RecordID() : RecordID(0, 0) {}
+	uint getPageID(int &pageID) const { pageID = page; }
+	uint getSlotID(int &slotID) const { slotID = slot; }
     void print() { cout << "page: " << page << ", slot: " << slot << endl; }
 };
 

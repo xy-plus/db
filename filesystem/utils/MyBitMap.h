@@ -173,7 +173,7 @@ public:
 		return h[_hash(k)];
 	}
 	static uint lowbit(uint k) {
-		return (k & (-k));
+		return ((int)k & (-(int)k));
 	}
 	static void getPos(int index, int& pos, int& bit) {
 		pos = (index >> BIAS);

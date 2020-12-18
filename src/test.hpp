@@ -1,7 +1,6 @@
 #ifndef TEST_HPP
 #define TEST_HPP
 
-#include <cstring>
 #include <string>
 #include "FileHandler.hpp"
 #include "Record.hpp"
