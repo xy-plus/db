@@ -66,10 +66,10 @@ public:
 		return true;
 	}
 
-	bool delete_Record(vector<Type> vals) {
+	bool delete_Record(vector<Type> vals, RecordID rid) {
 		Value oldKey;
 		oldKey.setVals(vals);
-		return deleteNode(root, oldKey);
+		return deleteNode(root, oldKey, rid);
 	}
 
 	vector<RecordID> find_Record(vector<Type> vals, vector<CmpOP> ops) {
@@ -78,9 +78,6 @@ public:
 		return findNode(root, key, ops);
 	}
 
-	bool rebuild() {
-		// TODO
-	}
 
 private:
 	friend class IndexManager;
@@ -512,15 +509,18 @@ private:
 		return true;
 	}
 
-	bool deleteNode(RecordID now, Value newValue) {
+	bool deleteNode(RecordID now, Value newValue, RecordID orid) {
 		TreeNode* temp = getNode(now);
 		if (temp->isLeaf) {
 			int keyNum = temp->getKeyNum();
 			int addr = -1;
 			for (int i = 0; i < keyNum; ++i) {
 				if (compare(newValue, temp->getKey(i), EQ)) {
-					addr = i;
-					break;
+					RecordID rid0 = temp->getChild(i);
+					if (rid0.page == orid.page && rid0.slot == orid.slot) {
+						addr = i;
+						break;
+					}
 				}
 			}
 			if (addr == -1) {

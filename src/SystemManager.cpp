@@ -10,6 +10,8 @@
 #include "FileScan.hpp"
 #include "DBHandle.h"
 #include "Printer.hpp"
+#include "IndexManager.hpp"
+#include "BTree.hpp"
 
 #ifdef __APPLE__
 #include <sys/stat.h>
@@ -629,14 +631,27 @@ int SystemManager::createIndex(string relName, Attribute attrName, string idxNam
 
     dbHandle.refreshHandle();
 
-    
-    IndexHandler::instance()->CreateIndex(relName.c_str(), indexCount, attrData.attrType, attrData.attrLength);
+	// TODO
+	IndexManager* IM = new IndexManager(bpm, fm);
+	vector<int> indexs;
+	vector<AttrType> attrTypes;
+	vector<int> attrLength;
 
-    SingleIndexHandler indexHandle;
-    
+	indexs.clear();
+	attrTypes.clear();
+	attrLengths.claer();
+
+	indexs.push_back(indexCount);
+	attrTypes.push_back(attrData.attrType);
+	attrLengths.push_back(attrData.attrLength);
+
+	bool ok = IM->create_index(relName.c_str(), indexs, attrTypes, attrLengths);
+	BTree* btree;
+	    
     int rc;
     auto records = retrieveRecords(relName, rc);
-    IndexHandler::instance()->OpenIndex(relName.c_str(), indexCount, indexHandle);
+	IM->open_index(relName.c_str(), indexs, &btree);
+
     for (auto it = records.begin(); it != records.end(); ++it) {
         RecordID rid = it->first;
         RecordDescriptor r = it->second;
@@ -645,8 +660,35 @@ int SystemManager::createIndex(string relName, Attribute attrName, string idxNam
         if(v.isNull)
             continue;
         data = (char*)v.getElementPointer();
-        indexHandle.InsertEntry(data, rid);
+
+		vector<Type> datas;
+		Type temp;
+		switch (attrData.attrType) {
+		case T_INT:
+			temp.setAttrType(INTEGER);
+			temp.setInt(to_string(data));
+			break;
+		case T_FLOAT:
+			temp.setAttrType(NUMERIC);
+			temp.setNumericString(to_string(data));
+			break;
+		case T_STRING:
+			temp.setAttrType(CHAR);
+			temp.setVal(to_string(data));
+			break;
+		case T_DATE:
+			temp.setAttrType(DATE);
+			temp.setDate(to_string(data));
+			break;
+		case T_NONE:
+			break;
+		default:
+		}
+		datas.push_back(temp);
+		btree->insert_Record(rid, datas);
     }
+	delete btree;
+	delete IM;
     return RETVAL_OK;
 }
 
@@ -692,8 +734,17 @@ int SystemManager::dropIndex(string relName, string idxName) {
     GlobalFileHandler->modifyRecord(attrRID, (BufType)(&attrData));
 	recordManager->closeFile();
     
-    IndexHandler::instance()->DestroyIndex(relName.c_str(), indexNo);
-    
+    // TODO
+	IndexManager* IM = new IndexManager(bpm, fm);
+	vector<int> indexs;
+
+	indexs.clear();
+
+	indexs.push_back(indexCount);
+	bool ok = IM->delete_index(relName.c_str(), indexs);
+	delete IM;
+
+
     GlobalFileHandler = recordManager->openFile(kDefaultIdxCatName);
     int pag, slt;
     indexRID.getPageID(pag);
@@ -929,9 +980,48 @@ int SystemManager::Insert(std::string relName, std::vector<std::string>* attrs, 
             
             char *data = (char*)descriptor.attrVals[primaryKeyIndex].getElementPointer();
 
-            SingleIndexHandler indexHandle;
-            IndexHandler::instance()->OpenIndex(relName.c_str(), dataAttrInfo[primaryKeyIndex].indexNo, indexHandle);
-            auto ret = indexHandle.ScanIndex(data, T_EQ);
+			// TODO
+			IndexManager* IM = new IndexManager(bpm, fm);
+			vector<int> indexs;
+			indexs.clear();
+			indexs.push_back(dataAttrInfo[primaryKeyIndex].indexNo);
+			BTree* btree;
+			IM->open_index(relName.c_str(), indexs, &btree);
+
+
+
+			vector<Type> datas;
+			Type temp;
+			switch (attrData.attrType) {
+			case T_INT:
+				temp.setAttrType(INTEGER);
+				temp.setInt(to_string(data));
+				break;
+			case T_FLOAT:
+				temp.setAttrType(NUMERIC);
+				temp.setNumericString(to_string(data));
+				break;
+			case T_STRING:
+				temp.setAttrType(CHAR);
+				temp.setVal(to_string(data));
+				break;
+			case T_DATE:
+				temp.setAttrType(DATE);
+				temp.setDate(to_string(data));
+				break;
+			case T_NONE:
+				break;
+			default:
+			}
+			datas.push_back(temp);
+			vector<CmpOP> ops;
+			ops.clear();
+			ops.push_back(EQ);
+			auto ret = btree->find_Record(datas, ops);
+
+			delete btree;
+			delete IM;
+
             if (ret.size() > 0){
                 cerr << "[ERROR] Duplicated primary key values." << endl;
                 return RETVAL_ERR;
@@ -1010,9 +1100,45 @@ int SystemManager::Insert(std::string relName, std::vector<std::string>* attrs, 
             if(v.isNull)
                 continue;
             data = (char*)v.getElementPointer();
-            SingleIndexHandler indexHandle;
-            IndexHandler::instance()->OpenIndex(relName.c_str(), dataAttrInfo[i].indexNo, indexHandle);
-            indexHandle.InsertEntry(data, rid);
+
+
+
+			// TODO
+			IndexManager* IM = new IndexManager(bpm, fm);
+			vector<int> indexs;
+			indexs.clear();
+			indexs.push_back(dataAttrInfo[i].indexNo);
+			BTree* btree;
+			IM->open_index(relName.c_str(), indexs, &btree);
+
+			vector<Type> datas;
+			Type temp;
+			switch (attrData.attrType) {
+			case T_INT:
+				temp.setAttrType(INTEGER);
+				temp.setInt(to_string(data));
+				break;
+			case T_FLOAT:
+				temp.setAttrType(NUMERIC);
+				temp.setNumericString(to_string(data));
+				break;
+			case T_STRING:
+				temp.setAttrType(CHAR);
+				temp.setVal(to_string(data));
+				break;
+			case T_DATE:
+				temp.setAttrType(DATE);
+				temp.setDate(to_string(data));
+				break;
+			case T_NONE:
+				break;
+			default:
+			}
+			datas.push_back(temp);
+			btree->insert_Record(rid, datas);
+
+			delete btree;
+			delete IM;
         }
 
     delete []dataAttrInfo;
@@ -1096,11 +1222,44 @@ int SystemManager::Update(std::string relName,
                         if(v.isNull)
                             continue;
                         data = (char*)v.getElementPointer();
-                        SingleIndexHandler indexHandle;
-                        IndexHandler::instance()->OpenIndex(relName.c_str(),
-                                                                    dataAttrInfo[i].indexNo,
-                                                                    indexHandle);
-                        indexHandle.DeleteEntry(data, it->first);
+
+
+						// TODO
+						IndexManager* IM = new IndexManager(bpm, fm);
+						vector<int> indexs;
+						indexs.clear();
+						indexs.push_back(dataAttrInfo[i].indexNo);
+						BTree* btree;
+						IM->open_index(relName.c_str(), indexs, &btree);
+
+						vector<Type> datas;
+						Type temp;
+						switch (attrData.attrType) {
+						case T_INT:
+							temp.setAttrType(INTEGER);
+							temp.setInt(to_string(data));
+							break;
+						case T_FLOAT:
+							temp.setAttrType(NUMERIC);
+							temp.setNumericString(to_string(data));
+							break;
+						case T_STRING:
+							temp.setAttrType(CHAR);
+							temp.setVal(to_string(data));
+							break;
+						case T_DATE:
+							temp.setAttrType(DATE);
+							temp.setDate(to_string(data));
+							break;
+						case T_NONE:
+							break;
+						default:
+						}
+						datas.push_back(temp);
+						btree->delete_Record(datas, it->first);
+
+						delete btree;
+						delete IM;
                     }
                 }
 
@@ -1177,11 +1336,44 @@ int SystemManager::Update(std::string relName,
                         if(v.isNull)
                             continue;
                         data = (char*)v.getElementPointer();
-                        SingleIndexHandler indexHandle;
-                        IndexHandler::instance()->OpenIndex(relName.c_str(),
-                                                                    dataAttrInfo[i].indexNo,
-                                                                    indexHandle);
-                        indexHandle.InsertEntry(data, it->first);
+
+
+						// TODO
+						IndexManager* IM = new IndexManager(bpm, fm);
+						vector<int> indexs;
+						indexs.clear();
+						indexs.push_back(dataAttrInfo[i].indexNo);
+						BTree* btree;
+						IM->open_index(relName.c_str(), indexs, &btree);
+
+						vector<Type> datas;
+						Type temp;
+						switch (attrData.attrType) {
+						case T_INT:
+							temp.setAttrType(INTEGER);
+							temp.setInt(to_string(data));
+							break;
+						case T_FLOAT:
+							temp.setAttrType(NUMERIC);
+							temp.setNumericString(to_string(data));
+							break;
+						case T_STRING:
+							temp.setAttrType(CHAR);
+							temp.setVal(to_string(data));
+							break;
+						case T_DATE:
+							temp.setAttrType(DATE);
+							temp.setDate(to_string(data));
+							break;
+						case T_NONE:
+							break;
+						default:
+						}
+						datas.push_back(temp);
+						btree->insert_Record(it->first, datas);
+
+						delete btree;
+						delete IM;
                     }
                 }
             }
@@ -1223,9 +1415,43 @@ int SystemManager::Update(std::string relName,
                 if(v.isNull)
                     continue;
                 data = (char*)v.getElementPointer();
-                SingleIndexHandler indexHandle;
-                IndexHandler::instance()->OpenIndex(relName.c_str(), dataAttrInfo[i].indexNo, indexHandle);
-                indexHandle.DeleteEntry(data, recordID);
+
+				// TODO
+				IndexManager* IM = new IndexManager(bpm, fm);
+				vector<int> indexs;
+				indexs.clear();
+				indexs.push_back(dataAttrInfo[i].indexNo);
+				BTree* btree;
+				IM->open_index(relName.c_str(), indexs, &btree);
+
+				vector<Type> datas;
+				Type temp;
+				switch (attrData.attrType) {
+				case T_INT:
+					temp.setAttrType(INTEGER);
+					temp.setInt(to_string(data));
+					break;
+				case T_FLOAT:
+					temp.setAttrType(NUMERIC);
+					temp.setNumericString(to_string(data));
+					break;
+				case T_STRING:
+					temp.setAttrType(CHAR);
+					temp.setVal(to_string(data));
+					break;
+				case T_DATE:
+					temp.setAttrType(DATE);
+					temp.setDate(to_string(data));
+					break;
+				case T_NONE:
+					break;
+				default:
+				}
+				datas.push_back(temp);
+				btree->delete_Record(datas, recordID);
+
+				delete btree;
+				delete IM;
             }
         }
 
@@ -1305,9 +1531,43 @@ int SystemManager::Update(std::string relName,
                 if(v.isNull)
                     continue;
                 data = (char*)v.getElementPointer();
-                SingleIndexHandler indexHandle;
-                IndexHandler::instance()->OpenIndex(relName.c_str(), dataAttrInfo[i].indexNo, indexHandle);
-                indexHandle.DeleteEntry(data, recordID);
+
+				// TODO
+				IndexManager* IM = new IndexManager(bpm, fm);
+				vector<int> indexs;
+				indexs.clear();
+				indexs.push_back(dataAttrInfo[i].indexNo);
+				BTree* btree;
+				IM->open_index(relName.c_str(), indexs, &btree);
+
+				vector<Type> datas;
+				Type temp;
+				switch (attrData.attrType) {
+				case T_INT:
+					temp.setAttrType(INTEGER);
+					temp.setInt(to_string(data));
+					break;
+				case T_FLOAT:
+					temp.setAttrType(NUMERIC);
+					temp.setNumericString(to_string(data));
+					break;
+				case T_STRING:
+					temp.setAttrType(CHAR);
+					temp.setVal(to_string(data));
+					break;
+				case T_DATE:
+					temp.setAttrType(DATE);
+					temp.setDate(to_string(data));
+					break;
+				case T_NONE:
+					break;
+				default:
+				}
+				datas.push_back(temp);
+				btree->delete_Record(datas, recordID);
+
+				delete btree;
+				delete IM;
             }
         }
 
@@ -1388,9 +1648,43 @@ int SystemManager::Delete(std::string relName, std::vector<ComparisonTree::Compa
                     if(v.isNull)
                         continue;
                     data = (char*)v.getElementPointer();
-                    SingleIndexHandler indexHandle;
-                    IndexHandler::instance()->OpenIndex(relName.c_str(), dataAttrInfo[i].indexNo, indexHandle);
-                    indexHandle.DeleteEntry(data, recordID);
+
+					// TODO
+					IndexManager* IM = new IndexManager(bpm, fm);
+					vector<int> indexs;
+					indexs.clear();
+					indexs.push_back(dataAttrInfo[i].indexNo);
+					BTree* btree;
+					IM->open_index(relName.c_str(), indexs, &btree);
+
+					vector<Type> datas;
+					Type temp;
+					switch (attrData.attrType) {
+					case T_INT:
+						temp.setAttrType(INTEGER);
+						temp.setInt(to_string(data));
+						break;
+					case T_FLOAT:
+						temp.setAttrType(NUMERIC);
+						temp.setNumericString(to_string(data));
+						break;
+					case T_STRING:
+						temp.setAttrType(CHAR);
+						temp.setVal(to_string(data));
+						break;
+					case T_DATE:
+						temp.setAttrType(DATE);
+						temp.setDate(to_string(data));
+						break;
+					case T_NONE:
+						break;
+					default:
+					}
+					datas.push_back(temp);
+					btree->delete_Record(datas, recordID);
+
+					delete btree;
+					delete IM;
                 }
             }
 
@@ -1619,10 +1913,46 @@ vector<RecordDescriptor> SystemManager::retrieveRecordsByIndex(string relName,
                 continue;
             data = (char*)v.getElementPointer();
 
+			// TODO
+			IndexManager* IM = new IndexManager(bpm, fm);
+			vector<int> indexs;
+			indexs.clear();
+			indexs.push_back(indexNoMap[com.attr.attrName]);
+			BTree* btree;
+			IM->open_index(relName.c_str(), indexs, &btree);
+			
+			vector<Type> datas;
+			Type temp;
+			switch (attrData.attrType) {
+			case T_INT:
+				temp.setAttrType(INTEGER);
+				temp.setInt(to_string(data));
+				break;
+			case T_FLOAT:
+				temp.setAttrType(NUMERIC);
+				temp.setNumericString(to_string(data));
+				break;
+			case T_STRING:
+				temp.setAttrType(CHAR);
+				temp.setVal(to_string(data));
+				break;
+			case T_DATE:
+				temp.setAttrType(DATE);
+				temp.setDate(to_string(data));
+				break;
+			case T_NONE:
+				break;
+			default:
+			}
+			datas.push_back(temp);
+			vector<CmpOP> ops;
+			ops.clear();
+			ops.push_back(com.op);
+			auto ret = btree->find_Record(datas, ops);
 
-            SingleIndexHandler indexHandle;
-            IndexHandler::instance()->OpenIndex(relName.c_str(), indexNoMap[com.attr.attrName], indexHandle);
-            auto ret = indexHandle.ScanIndex(data, com.op);
+			delete btree;
+			delete IM;
+
             FileHandler *f = GlobalFileHandler::instance()->openFile(relName.c_str());
             for(const auto& rid : ret) {
                 Record rrr;

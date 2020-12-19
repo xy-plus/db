@@ -4,6 +4,6 @@ enum CmpOP {
 };
 
 
-enum AttrType {
+enum Types {
 	INTEGER, DATE, CHAR, VARCHAR, NUMERIC
 };
