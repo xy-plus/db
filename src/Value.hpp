@@ -95,14 +95,14 @@ public:
 		// 用于find，只考虑第一个val
 		bool ok = true;
 		switch(ops[0]){
-		case LE:
-		case GE:
-		case LT:
-		case GT:
+		case T_LE:
+		case T_GE:
+		case T_LT:
+		case T_GT:
 			ok = this->vals[0].cmp(b.vals[0], ops[0], false);
 			break;
-		case EQ:
-			ok = this->vals[0].cmp(b.vals[0], GE, false);
+		case T_EQ:
+			ok = this->vals[0].cmp(b.vals[0], T_GE, false);
 			break;
 		default:
 			// isnull、isnotnull、ne、in、no不能用于排序，默认符合

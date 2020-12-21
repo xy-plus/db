@@ -44,7 +44,7 @@ public:
 		this->fm = fm;
 	}
 
-	bool create_index(const char* fileName, vector<int> indexNo, vector<AttrType> attrType, vector<int> attrLen) {
+	bool create_index(const char* fileName, vector<int> indexNo, vector<Types> attrType, vector<int> attrLen) {
 		int num = indexNo.size();
 		if (attrType.size() != num) {
 			return false;

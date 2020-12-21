@@ -29,8 +29,8 @@ public:
 		closeFile();
 	}
 
-	int createFile(const char *fileName, int recordSize) {
-		if (recordSize > PAGE_SIZE)
+	int createFile(const char *fileName, int recordLength) {
+		if (recordLength > PAGE_SIZE)
 			return RETVAL_ERR;
 		if (currentFileHandle.isOpen()) {
 			int rc = closeFile(currentFileHandle);
@@ -40,11 +40,23 @@ public:
 			}
 		}
 
-		int fileID;
+		int fileID, index;
 		fileManager->createFile(fileName);
 		fileManager->openFile(fileName, fileID);
-		FirstPageInfo firstPageHandle(fileID, bufPageManager);
-		firstPageHandle.init(recordSize);
+
+		MetadataPageInfo* metadata = (MetadataPageInfo*)(bufPageManager)->allocPage(fileID, 0, index);
+		bufPageManager->markDirty(index);
+		metadata->pageCount = 2;
+		metadata->recordLength = recordLength;
+		metadata->recordCount = 0;
+		metadata->nextAvailPage = 1;
+		metadata->pageSlotNumber = PAGE_SLOT_COUNT / recordLength;
+		BufType secondPage = bufPageManager->allocPage(fileID, 1, index);
+		PageInfo* pg = (PageInfo*)secondPage;
+		bufPageManager->markDirty(index);
+		pg->pageNumber = 1;
+		pg->nextAvailPage = 0;
+
 		bufPageManager->close();
 		fileManager->closeFile(fileID);
 
@@ -101,9 +113,10 @@ public:
 		return RETVAL_OK;
 	}
 	BufPageManager *bufPageManager;
+	FileManager *fileManager;
+
 private:
 	static GlobalFileHandler *recordManager;
-	FileManager *fileManager;
 
 	FileHandler currentFileHandle;
 

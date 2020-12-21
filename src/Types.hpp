@@ -7,7 +7,7 @@ using namespace std;
 
 class Type {
 	bool isNull = false;
-	AttrType type;
+	Types type;
 
 	/*
 	num:
@@ -100,7 +100,7 @@ class Type {
 				return false;
 			return true;
 			break;
-		case CHAR:
+		case T_CHAR:
 			if (b.num[0] != this->num[0])
 				return false;
 			for (int i = 0; i < this->num[0]; ++i)
@@ -182,7 +182,7 @@ class Type {
 				return false;
 			return false;
 			break;
-		case CHAR:
+		case T_CHAR:
 			for (int i = 0; i < this->num[0]; ++i)
 				s1 += this->val[i];
 			for (int i = 0; i < b.num[0]; ++i)
@@ -294,7 +294,7 @@ public:
 			((int*)buf)[1] = num[1];
 			((int*)buf)[2] = num[2];
 			break;
-		case CHAR:
+		case T_CHAR:
 			len += num[0];
 			for (int i = 0; i < num[0]; ++i)
 				buf[i] = val[i];
@@ -321,7 +321,7 @@ public:
 
 	void fromChars(char* buf, int len) {
 		int tp = (int)(buf[0]);
-		type = (AttrType)tp;
+		type = (Types)tp;
 		tp = (int)(buf[1]);
 		if (tp == 0) isNull = false;
 		  else isNull = true;
@@ -338,7 +338,7 @@ public:
 			num[1] = ((int*)(buf))[1];
 			num[2] = ((int*)(buf))[2];
 			break;
-		case CHAR:
+		case T_CHAR:
 			num[0] = len - 2;
 			val.clear();
 			for (int i = 0; i < num[0]; ++i) {
@@ -382,7 +382,7 @@ public:
 			num[1] = b.num[1];
 			num[2] = b.num[2];
 			break;
-		case CHAR:
+		case T_CHAR:
 			num[0] = b.num[0];
 			val.clear();
 			for (int i = 0; i < b.val.size(); ++i) {
@@ -420,7 +420,9 @@ public:
 	}
 
 	// DATE
-	bool setDate(int y, int m, int d) {
+	bool setDate(char* date) {
+		int y, m, d;
+		sscanf(date, "%d-%d-%d", &y, &m, &d);
 		if (y < 1000 || y > 9999) {
 			return false;
 		}
@@ -509,7 +511,7 @@ public:
 			for (int i = 0; i < str.length(); ++i)
 				val[i] = str[i];
 
-			if (type == CHAR) {
+			if (type == T_CHAR) {
 				for (int i = str.length(); i < num[0]; ++i)
 					val[i] = ' ';
 			}
@@ -649,7 +651,7 @@ public:
 		return opt;
 	}
 
-	void setAttrType(AttrType tp) {
+	void setAttrType(Types tp) {
 		type = tp;
 		num.clear();
 		val.clear();
@@ -663,7 +665,7 @@ public:
 			num.push_back(0);
 			num.push_back(0);
 			break;
-		case CHAR:
+		case T_CHAR:
 			num.push_back(0);
 			break;
 		case VARCHAR:
@@ -689,7 +691,7 @@ public:
 		case DATE:
 			return 12 + 2;
 			break;
-		case CHAR:
+		case T_CHAR:
 			return num[0] + 2;
 			break;
 		case VARCHAR:
@@ -714,7 +716,7 @@ public:
 		return isNull;
 	}
 
-	AttrType getType() {
+	Types getType() {
 		return type;
 	}
 
@@ -733,7 +735,7 @@ public:
 	}
 
 	bool isChar() {
-		if (type == CHAR) {
+		if (type == T_CHAR) {
 			return true;
 		}
 		return false;
@@ -757,46 +759,46 @@ public:
 		bool ok = false;
 		if (b.type == this->type) {
 			switch (op) {
-			case EQ:
+			case T_EQ:
 				if ((checked) && (b.getIsNull() || this->getIsNull()))
 					break;
 				ok = equal(b);
 				break;
-			case NE:
+			case T_NE:
 				if ((checked) && (b.getIsNull() || this->getIsNull()))
 					break;
 				ok = !equal(b);
 				break;
-			case LT:
+			case T_LT:
 				if ((checked) && (b.getIsNull() || this->getIsNull()))
 					break;
 				ok = less(b);
 				break;
-			case GT:
+			case T_GT:
 				if ((checked) && (b.getIsNull() || this->getIsNull()))
 					break;
 				ok = !(less(b) | equal(b));
 				break;
-			case LE:
+			case T_LE:
 				if ((checked) && (b.getIsNull() || this->getIsNull()))
 					break;
 				ok = less(b) | equal(b);
 				break;
-			case GE:
+			case T_GE:
 				if ((checked) && (b.getIsNull() || this->getIsNull()))
 					break;
 				ok = !less(b);
 				break;
-			case NO:
+			case T_NO:
 				ok = true;
 				break;
-			case ISNOTNULL:
+			case T_ISNOTNULL:
 				ok = !getIsNull();
 				break;
-			case ISNULL:
+			case T_ISNULL:
 				ok = getIsNull();
 				break;
-			case IN:
+			case T_IN:
 				// TODO
 				break;
 			default:

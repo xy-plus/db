@@ -1,9 +1,6 @@
 #pragma once
-enum CmpOP {
-	EQ, LT, GT, LE, GE, NE, NO, ISNOTNULL, ISNULL, IN
-};
-
+#include "global.h"
 
 enum Types {
-	INTEGER, DATE, CHAR, VARCHAR, NUMERIC
+	INTEGER, DATE, T_CHAR, VARCHAR, NUMERIC
 };

@@ -25,21 +25,15 @@ public:
 		Value newKey;
 		oldKey.setVals(oldVal);
 		newKey.setVals(newVal);
-		RecordID oldID;
 		if (checkType(newKey) == false) {
 			return false;
 		}
-		if (searchNode(root, oldKey, oldID)) {
-			if (equalRID(oldID, rid)) {
-				if (!searchNode(root, newKey, oldID)) {
-					deleteNode(root, oldKey);
-					insertNode(root, newrid, newKey);
-				} else {
-					// has the same new key
-					return false;
-				}
+		if (searchNode(root, oldKey, rid)) {
+			if (!searchNode(root, newKey, newrid)) {
+				deleteNode(root, oldKey, rid);
+				insertNode(root, newrid, newKey);
 			} else {
-				// old ID error
+				// has the same key and rid
 				return false;
 			}
 		} else {
@@ -57,10 +51,10 @@ public:
 		if (checkType(newKey) == false) {
 			return false;
 		}
-		if (!searchNode(root, newKey, oldID)) {
+		if (!searchNode(root, newKey, rid)) {
 			insertNode(root, rid, newKey);
 		} else {
-			// has the same key
+			// has the same key and rid
 			return false;
 		}
 		return true;
@@ -85,7 +79,7 @@ private:
 	int num;
 
 	int numAttr;
-	vector<AttrType> attrTypes;
+	vector<Types> attrTypes;
 	vector<int> attrLen;
 
 	FileHandler* fileHandler;
@@ -115,7 +109,7 @@ private:
 			Type temp = a.getVal(i);
 			if (temp.getType() != attrTypes[i])
 				return false;
-			if (attrTypes[i] == CHAR | attrTypes[i] == VARCHAR) {
+			if (attrTypes[i] == T_CHAR | attrTypes[i] == VARCHAR) {
 				if (attrLen[i] != temp.getLen()) {
 					return false;
 				}
@@ -124,7 +118,7 @@ private:
 		return true;
 	}
 
-	void setAttrs(vector<AttrType> types, vector<int> lens) {
+	void setAttrs(vector<Types> types, vector<int> lens) {
 		num = 0;
 		numAttr = types.size();
 		attrTypes.assign(types.begin(), types.end());
@@ -151,7 +145,7 @@ private:
 		for (int i = 0; i < numAttr; ++i) {
 			int a = (int)data[4 + i * 2];
 			int b = (int)data[5 + i * 2];
-			attrTypes.push_back((AttrType)a);
+			attrTypes.push_back((Types)a);
 			attrLen.push_back(b);
 		}
 	}
@@ -267,14 +261,15 @@ private:
 		return ans;
 	}
 
-	bool searchNode(RecordID now, Value key, RecordID &rID) {
+	bool searchNode(RecordID now, Value key, RecordID rID) {
 		TreeNode* temp = getNode(now);
 		if (temp->isLeaf) {
 			int keyNum = temp->getKeyNum();
 			for (int i = 0; i < keyNum; ++i) {
-				if (compare(key, temp->getKey(i), EQ)) {
-					rID = temp->getChild(i);
-					return true;
+				if (compare(key, temp->getKey(i), T_EQ)) {
+					RecordID tempID = temp->getChild(i);
+					if (equalRID(rID, tempID))
+						return true;
 				}
 			}
 		}
@@ -282,7 +277,7 @@ private:
 			int keyNum = temp->getKeyNum();
 			int addr = keyNum - 1;
 			for (int i = 0; i < keyNum; ++i) {
-				if (compare(key, temp->getKey(i), LE)) {
+				if (compare(key, temp->getKey(i), T_LE)) {
 					addr = i;
 					break;
 				}
@@ -303,7 +298,7 @@ private:
 			int keyNum = temp->getKeyNum();
 			int addr = keyNum;
 			for (int i = 0; i < keyNum; ++i) {
-				if (compare(newValue, temp->getKey(i), LE)) {
+				if (compare(newValue, temp->getKey(i), T_LE)) {
 					addr = i;
 					break;
 				}
@@ -316,7 +311,7 @@ private:
 			int keyNum = temp->getKeyNum();
 			int addr = keyNum - 1;
 			for (int i = 0; i < keyNum; ++i) {
-				if (compare(newValue, temp->getKey(i), LE)) {
+				if (compare(newValue, temp->getKey(i), T_LE)) {
 					addr = i;
 					break;
 				}
@@ -515,7 +510,7 @@ private:
 			int keyNum = temp->getKeyNum();
 			int addr = -1;
 			for (int i = 0; i < keyNum; ++i) {
-				if (compare(newValue, temp->getKey(i), EQ)) {
+				if (compare(newValue, temp->getKey(i), T_EQ)) {
 					RecordID rid0 = temp->getChild(i);
 					if (rid0.page == orid.page && rid0.slot == orid.slot) {
 						addr = i;
@@ -535,7 +530,7 @@ private:
 			int keyNum = temp->getKeyNum();
 			int addr = -1;
 			for (int i = 0; i < keyNum; ++i) {
-				if (compare(newValue, temp->getKey(i), LE)) {
+				if (compare(newValue, temp->getKey(i), T_LE)) {
 					addr = i;
 					break;
 				}
@@ -544,7 +539,7 @@ private:
 				delete temp;
 				return false;
 			}
-			bool answer = deleteNode(temp->getChild(addr), newValue);
+			bool answer = deleteNode(temp->getChild(addr), newValue, orid);
 
 			if (answer == false) {
 				delete temp;

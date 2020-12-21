@@ -134,6 +134,10 @@ public:
 	void release() {
 		isOpened = false;
 	}
+
+	int getPageNumber() const { return metadata->pageCount; }
+
+	int getSlotNumber() const { return metadata->pageSlotNumber; }
 };
 
 #endif
