@@ -123,6 +123,33 @@ database/fast:
 	$(MAKE) -f CMakeFiles/database.dir/build.make CMakeFiles/database.dir/build
 .PHONY : database/fast
 
+filesystem/utils/MyBitMap.o: filesystem/utils/MyBitMap.cpp.o
+
+.PHONY : filesystem/utils/MyBitMap.o
+
+# target to build an object file
+filesystem/utils/MyBitMap.cpp.o:
+	$(MAKE) -f CMakeFiles/database.dir/build.make CMakeFiles/database.dir/filesystem/utils/MyBitMap.cpp.o
+.PHONY : filesystem/utils/MyBitMap.cpp.o
+
+filesystem/utils/MyBitMap.i: filesystem/utils/MyBitMap.cpp.i
+
+.PHONY : filesystem/utils/MyBitMap.i
+
+# target to preprocess a source file
+filesystem/utils/MyBitMap.cpp.i:
+	$(MAKE) -f CMakeFiles/database.dir/build.make CMakeFiles/database.dir/filesystem/utils/MyBitMap.cpp.i
+.PHONY : filesystem/utils/MyBitMap.cpp.i
+
+filesystem/utils/MyBitMap.s: filesystem/utils/MyBitMap.cpp.s
+
+.PHONY : filesystem/utils/MyBitMap.s
+
+# target to generate assembly for a file
+filesystem/utils/MyBitMap.cpp.s:
+	$(MAKE) -f CMakeFiles/database.dir/build.make CMakeFiles/database.dir/filesystem/utils/MyBitMap.cpp.s
+.PHONY : filesystem/utils/MyBitMap.cpp.s
+
 src/DBHandle.o: src/DBHandle.cpp.o
 
 .PHONY : src/DBHandle.o
@@ -483,6 +510,9 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... database"
 	@echo "... edit_cache"
+	@echo "... filesystem/utils/MyBitMap.o"
+	@echo "... filesystem/utils/MyBitMap.i"
+	@echo "... filesystem/utils/MyBitMap.s"
 	@echo "... src/DBHandle.o"
 	@echo "... src/DBHandle.i"
 	@echo "... src/DBHandle.s"

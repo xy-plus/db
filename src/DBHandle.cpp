@@ -104,9 +104,81 @@ int DBHandle::refreshHandle() {
     其中，列信息是AttrInfo类型
 */
 int DBHandle::createTable(const char *relName, int attrCount, AttrInfo *attributes) {
-    vector<string> primary_key;
+    GlobalFileHandler* recordManager = GlobalFileHandler::instance();
+    // First Updata System Table
+    FileHandler* fileHandle = recordManager->openFile(kDefaultAttrCatName);
+    int record_size = 0;
+    DataAttrInfo dataAttrInfo;
+    ::set<string> attrs;
+    RecordID recordID;
+    /*
+        这个循环用于把所有attr的信息转化为record格式，便于保存
+    */
+    for(int i = 0; i < attrCount; ++i) {
+        const AttrInfo& attrInfo = attributes[i];
+        memset(&dataAttrInfo, 0, sizeof(DataAttrInfo));
+        dataAttrInfo.attrLength = attrInfo.attrLength;
+        dataAttrInfo.attrType = attrInfo.attrType;
+        strcpy(dataAttrInfo.attrName, attrInfo.attrName);
+        dataAttrInfo.offset = record_size;
+        dataAttrInfo.indexNo = 0;
+        dataAttrInfo.isPrimaryKey = attrInfo.isPrimaryKey;
+        dataAttrInfo.notNull = attrInfo.notNull;
+        strcpy(dataAttrInfo.relName, relName);
+        dataAttrInfo.isDefault = attrInfo.isDefault;
+        if (attrInfo.isDefault){
+            if (attrInfo.defaultVal.isNull)
+                *((unsigned int*)dataAttrInfo.defaultVal) = NULL_MAGIC_NUMBER;  // 默认值为NULL，则用magicnumber来记载
+            else
+                switch (attrInfo.attrType){
+                    case T_INT:
+                        memcpy((void*)dataAttrInfo.defaultVal, (void*)&attrInfo.defaultVal.i, sizeof (int));
+                        // printf("Default Value = %d\n", attrInfo.defaultVal.i);
+                        break;
+                    case T_FLOAT:
+                        memcpy((void*)dataAttrInfo.defaultVal, (void*)&attrInfo.defaultVal.f, sizeof (float));
+                        break;
+                    case T_STRING:
+                        strcpy(dataAttrInfo.defaultVal, attrInfo.defaultVal.s.c_str());
+                        break;
+                    case T_DATE:
+                        strcpy(dataAttrInfo.defaultVal, attrInfo.defaultVal.s.c_str());
+                        break;
+                }
+        }
+        record_size += attrInfo.attrLength;
 
-    
+        if (attrs.find(string(attrInfo.attrName)) == attrs.end())
+        {
+            attrs.insert(string(attrInfo.attrName));
+        }
+        else
+        {
+            cerr << "[ERROR] Duplicate attribute name." << endl;
+            return RETVAL_ERR;
+        }
+        fileHandle->insertRecord((BufType)&dataAttrInfo);
+    }
+
+    // Create New File
+    recordManager->createFile(relName, record_size + attrCount);
+
+    DataRelInfo dataRelInfo;
+    memset(&dataRelInfo, 0, sizeof(DataRelInfo));
+    // Update relcat
+    // TODO: Checkout Duplicated RelName
+    strcpy(dataRelInfo.relName, relName);
+    dataRelInfo.attrCount = attrCount;
+    dataRelInfo.recordSize = record_size;
+    dataRelInfo.indexCount = 0;
+    dataRelInfo.primaryCount = 0;
+    for (int i = 0; i < attrCount; ++i)
+        if (attributes[i].isPrimaryKey > 0)
+            dataRelInfo.primaryCount++;
+    fileHandle = recordManager->openFile(kDefaultRelCatName);
+    fileHandle->insertRecord((BufType)&dataRelInfo);
+
+    refreshHandle();
     return RETVAL_OK;
 }
 

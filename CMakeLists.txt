@@ -11,6 +11,7 @@ set(SOURCE_FILES
         filesystem/fileio/FileTable.h
         filesystem/utils/compare.h
         filesystem/utils/MyBitMap.h
+        filesystem/utils/MyBitMap.cpp
         filesystem/utils/MyHashMap.h
         filesystem/utils/MyLinkList.h
         filesystem/utils/pagedef.h
@@ -36,6 +37,7 @@ set(SOURCE_FILES
         src/parser/lex.yy.cpp
         src/parser/Tree.h
         src/parser/Tree.cpp
+        src/parser/parser.tab.hpp
         src/parser/parser.tab.cpp
         src/RecordDescriptor.cpp
         src/RecordDescriptor.h

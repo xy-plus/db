@@ -1,5 +1,7 @@
 all: parser.y parser.l
-	bison parser.y
+	bison parser.y -d -o parser.tab.cpp
 	flex parser.l
 	mv lex.yy.c lex.yy.cpp
-	mv parser.tab.c parser.tab.cpp
+
+clean:
+	rm *.o lex.yy.cpp parser.tab.cpp parser.tab.hpp

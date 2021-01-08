@@ -57,9 +57,33 @@ include CMakeFiles/database.dir/progress.make
 # Include the compile flags for this target's objects.
 include CMakeFiles/database.dir/flags.make
 
+CMakeFiles/database.dir/filesystem/utils/MyBitMap.cpp.o: CMakeFiles/database.dir/flags.make
+CMakeFiles/database.dir/filesystem/utils/MyBitMap.cpp.o: ../filesystem/utils/MyBitMap.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/yuanj17/Desktop/db/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/database.dir/filesystem/utils/MyBitMap.cpp.o"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/database.dir/filesystem/utils/MyBitMap.cpp.o -c /home/yuanj17/Desktop/db/filesystem/utils/MyBitMap.cpp
+
+CMakeFiles/database.dir/filesystem/utils/MyBitMap.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/database.dir/filesystem/utils/MyBitMap.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/yuanj17/Desktop/db/filesystem/utils/MyBitMap.cpp > CMakeFiles/database.dir/filesystem/utils/MyBitMap.cpp.i
+
+CMakeFiles/database.dir/filesystem/utils/MyBitMap.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/database.dir/filesystem/utils/MyBitMap.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/yuanj17/Desktop/db/filesystem/utils/MyBitMap.cpp -o CMakeFiles/database.dir/filesystem/utils/MyBitMap.cpp.s
+
+CMakeFiles/database.dir/filesystem/utils/MyBitMap.cpp.o.requires:
+
+.PHONY : CMakeFiles/database.dir/filesystem/utils/MyBitMap.cpp.o.requires
+
+CMakeFiles/database.dir/filesystem/utils/MyBitMap.cpp.o.provides: CMakeFiles/database.dir/filesystem/utils/MyBitMap.cpp.o.requires
+	$(MAKE) -f CMakeFiles/database.dir/build.make CMakeFiles/database.dir/filesystem/utils/MyBitMap.cpp.o.provides.build
+.PHONY : CMakeFiles/database.dir/filesystem/utils/MyBitMap.cpp.o.provides
+
+CMakeFiles/database.dir/filesystem/utils/MyBitMap.cpp.o.provides.build: CMakeFiles/database.dir/filesystem/utils/MyBitMap.cpp.o
+
+
 CMakeFiles/database.dir/src/FileHandler.cpp.o: CMakeFiles/database.dir/flags.make
 CMakeFiles/database.dir/src/FileHandler.cpp.o: ../src/FileHandler.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/yuanj17/Desktop/db/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/database.dir/src/FileHandler.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/yuanj17/Desktop/db/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/database.dir/src/FileHandler.cpp.o"
 	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/database.dir/src/FileHandler.cpp.o -c /home/yuanj17/Desktop/db/src/FileHandler.cpp
 
 CMakeFiles/database.dir/src/FileHandler.cpp.i: cmake_force
@@ -83,7 +107,7 @@ CMakeFiles/database.dir/src/FileHandler.cpp.o.provides.build: CMakeFiles/databas
 
 CMakeFiles/database.dir/src/GlobalFileHandler.cpp.o: CMakeFiles/database.dir/flags.make
 CMakeFiles/database.dir/src/GlobalFileHandler.cpp.o: ../src/GlobalFileHandler.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/yuanj17/Desktop/db/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/database.dir/src/GlobalFileHandler.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/yuanj17/Desktop/db/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/database.dir/src/GlobalFileHandler.cpp.o"
 	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/database.dir/src/GlobalFileHandler.cpp.o -c /home/yuanj17/Desktop/db/src/GlobalFileHandler.cpp
 
 CMakeFiles/database.dir/src/GlobalFileHandler.cpp.i: cmake_force
@@ -107,7 +131,7 @@ CMakeFiles/database.dir/src/GlobalFileHandler.cpp.o.provides.build: CMakeFiles/d
 
 CMakeFiles/database.dir/src/Record.cpp.o: CMakeFiles/database.dir/flags.make
 CMakeFiles/database.dir/src/Record.cpp.o: ../src/Record.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/yuanj17/Desktop/db/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/database.dir/src/Record.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/yuanj17/Desktop/db/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/database.dir/src/Record.cpp.o"
 	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/database.dir/src/Record.cpp.o -c /home/yuanj17/Desktop/db/src/Record.cpp
 
 CMakeFiles/database.dir/src/Record.cpp.i: cmake_force
@@ -131,7 +155,7 @@ CMakeFiles/database.dir/src/Record.cpp.o.provides.build: CMakeFiles/database.dir
 
 CMakeFiles/database.dir/src/PageInfo.cpp.o: CMakeFiles/database.dir/flags.make
 CMakeFiles/database.dir/src/PageInfo.cpp.o: ../src/PageInfo.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/yuanj17/Desktop/db/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/database.dir/src/PageInfo.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/yuanj17/Desktop/db/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/database.dir/src/PageInfo.cpp.o"
 	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/database.dir/src/PageInfo.cpp.o -c /home/yuanj17/Desktop/db/src/PageInfo.cpp
 
 CMakeFiles/database.dir/src/PageInfo.cpp.i: cmake_force
@@ -155,7 +179,7 @@ CMakeFiles/database.dir/src/PageInfo.cpp.o.provides.build: CMakeFiles/database.d
 
 CMakeFiles/database.dir/src/FileScan.cpp.o: CMakeFiles/database.dir/flags.make
 CMakeFiles/database.dir/src/FileScan.cpp.o: ../src/FileScan.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/yuanj17/Desktop/db/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/database.dir/src/FileScan.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/yuanj17/Desktop/db/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/database.dir/src/FileScan.cpp.o"
 	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/database.dir/src/FileScan.cpp.o -c /home/yuanj17/Desktop/db/src/FileScan.cpp
 
 CMakeFiles/database.dir/src/FileScan.cpp.i: cmake_force
@@ -179,7 +203,7 @@ CMakeFiles/database.dir/src/FileScan.cpp.o.provides.build: CMakeFiles/database.d
 
 CMakeFiles/database.dir/src/SystemManager.cpp.o: CMakeFiles/database.dir/flags.make
 CMakeFiles/database.dir/src/SystemManager.cpp.o: ../src/SystemManager.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/yuanj17/Desktop/db/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/database.dir/src/SystemManager.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/yuanj17/Desktop/db/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/database.dir/src/SystemManager.cpp.o"
 	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/database.dir/src/SystemManager.cpp.o -c /home/yuanj17/Desktop/db/src/SystemManager.cpp
 
 CMakeFiles/database.dir/src/SystemManager.cpp.i: cmake_force
@@ -203,7 +227,7 @@ CMakeFiles/database.dir/src/SystemManager.cpp.o.provides.build: CMakeFiles/datab
 
 CMakeFiles/database.dir/src/Printer.cpp.o: CMakeFiles/database.dir/flags.make
 CMakeFiles/database.dir/src/Printer.cpp.o: ../src/Printer.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/yuanj17/Desktop/db/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/database.dir/src/Printer.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/yuanj17/Desktop/db/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/database.dir/src/Printer.cpp.o"
 	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/database.dir/src/Printer.cpp.o -c /home/yuanj17/Desktop/db/src/Printer.cpp
 
 CMakeFiles/database.dir/src/Printer.cpp.i: cmake_force
@@ -227,7 +251,7 @@ CMakeFiles/database.dir/src/Printer.cpp.o.provides.build: CMakeFiles/database.di
 
 CMakeFiles/database.dir/src/RecordDescriptor.cpp.o: CMakeFiles/database.dir/flags.make
 CMakeFiles/database.dir/src/RecordDescriptor.cpp.o: ../src/RecordDescriptor.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/yuanj17/Desktop/db/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/database.dir/src/RecordDescriptor.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/yuanj17/Desktop/db/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/database.dir/src/RecordDescriptor.cpp.o"
 	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/database.dir/src/RecordDescriptor.cpp.o -c /home/yuanj17/Desktop/db/src/RecordDescriptor.cpp
 
 CMakeFiles/database.dir/src/RecordDescriptor.cpp.i: cmake_force
@@ -251,7 +275,7 @@ CMakeFiles/database.dir/src/RecordDescriptor.cpp.o.provides.build: CMakeFiles/da
 
 CMakeFiles/database.dir/src/DBHandle.cpp.o: CMakeFiles/database.dir/flags.make
 CMakeFiles/database.dir/src/DBHandle.cpp.o: ../src/DBHandle.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/yuanj17/Desktop/db/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/database.dir/src/DBHandle.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/yuanj17/Desktop/db/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object CMakeFiles/database.dir/src/DBHandle.cpp.o"
 	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/database.dir/src/DBHandle.cpp.o -c /home/yuanj17/Desktop/db/src/DBHandle.cpp
 
 CMakeFiles/database.dir/src/DBHandle.cpp.i: cmake_force
@@ -275,7 +299,7 @@ CMakeFiles/database.dir/src/DBHandle.cpp.o.provides.build: CMakeFiles/database.d
 
 CMakeFiles/database.dir/src/parser/lex.yy.cpp.o: CMakeFiles/database.dir/flags.make
 CMakeFiles/database.dir/src/parser/lex.yy.cpp.o: ../src/parser/lex.yy.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/yuanj17/Desktop/db/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object CMakeFiles/database.dir/src/parser/lex.yy.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/yuanj17/Desktop/db/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building CXX object CMakeFiles/database.dir/src/parser/lex.yy.cpp.o"
 	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/database.dir/src/parser/lex.yy.cpp.o -c /home/yuanj17/Desktop/db/src/parser/lex.yy.cpp
 
 CMakeFiles/database.dir/src/parser/lex.yy.cpp.i: cmake_force
@@ -299,7 +323,7 @@ CMakeFiles/database.dir/src/parser/lex.yy.cpp.o.provides.build: CMakeFiles/datab
 
 CMakeFiles/database.dir/src/parser/Tree.cpp.o: CMakeFiles/database.dir/flags.make
 CMakeFiles/database.dir/src/parser/Tree.cpp.o: ../src/parser/Tree.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/yuanj17/Desktop/db/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building CXX object CMakeFiles/database.dir/src/parser/Tree.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/yuanj17/Desktop/db/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building CXX object CMakeFiles/database.dir/src/parser/Tree.cpp.o"
 	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/database.dir/src/parser/Tree.cpp.o -c /home/yuanj17/Desktop/db/src/parser/Tree.cpp
 
 CMakeFiles/database.dir/src/parser/Tree.cpp.i: cmake_force
@@ -323,7 +347,7 @@ CMakeFiles/database.dir/src/parser/Tree.cpp.o.provides.build: CMakeFiles/databas
 
 CMakeFiles/database.dir/src/parser/parser.tab.cpp.o: CMakeFiles/database.dir/flags.make
 CMakeFiles/database.dir/src/parser/parser.tab.cpp.o: ../src/parser/parser.tab.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/yuanj17/Desktop/db/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building CXX object CMakeFiles/database.dir/src/parser/parser.tab.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/yuanj17/Desktop/db/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Building CXX object CMakeFiles/database.dir/src/parser/parser.tab.cpp.o"
 	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/database.dir/src/parser/parser.tab.cpp.o -c /home/yuanj17/Desktop/db/src/parser/parser.tab.cpp
 
 CMakeFiles/database.dir/src/parser/parser.tab.cpp.i: cmake_force
@@ -347,7 +371,7 @@ CMakeFiles/database.dir/src/parser/parser.tab.cpp.o.provides.build: CMakeFiles/d
 
 CMakeFiles/database.dir/src/main.cpp.o: CMakeFiles/database.dir/flags.make
 CMakeFiles/database.dir/src/main.cpp.o: ../src/main.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/yuanj17/Desktop/db/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Building CXX object CMakeFiles/database.dir/src/main.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/yuanj17/Desktop/db/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Building CXX object CMakeFiles/database.dir/src/main.cpp.o"
 	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/database.dir/src/main.cpp.o -c /home/yuanj17/Desktop/db/src/main.cpp
 
 CMakeFiles/database.dir/src/main.cpp.i: cmake_force
@@ -371,6 +395,7 @@ CMakeFiles/database.dir/src/main.cpp.o.provides.build: CMakeFiles/database.dir/s
 
 # Object files for target database
 database_OBJECTS = \
+"CMakeFiles/database.dir/filesystem/utils/MyBitMap.cpp.o" \
 "CMakeFiles/database.dir/src/FileHandler.cpp.o" \
 "CMakeFiles/database.dir/src/GlobalFileHandler.cpp.o" \
 "CMakeFiles/database.dir/src/Record.cpp.o" \
@@ -388,6 +413,7 @@ database_OBJECTS = \
 # External object files for target database
 database_EXTERNAL_OBJECTS =
 
+database: CMakeFiles/database.dir/filesystem/utils/MyBitMap.cpp.o
 database: CMakeFiles/database.dir/src/FileHandler.cpp.o
 database: CMakeFiles/database.dir/src/GlobalFileHandler.cpp.o
 database: CMakeFiles/database.dir/src/Record.cpp.o
@@ -403,7 +429,7 @@ database: CMakeFiles/database.dir/src/parser/parser.tab.cpp.o
 database: CMakeFiles/database.dir/src/main.cpp.o
 database: CMakeFiles/database.dir/build.make
 database: CMakeFiles/database.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/yuanj17/Desktop/db/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Linking CXX executable database"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/yuanj17/Desktop/db/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_15) "Linking CXX executable database"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/database.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
@@ -411,6 +437,7 @@ CMakeFiles/database.dir/build: database
 
 .PHONY : CMakeFiles/database.dir/build
 
+CMakeFiles/database.dir/requires: CMakeFiles/database.dir/filesystem/utils/MyBitMap.cpp.o.requires
 CMakeFiles/database.dir/requires: CMakeFiles/database.dir/src/FileHandler.cpp.o.requires
 CMakeFiles/database.dir/requires: CMakeFiles/database.dir/src/GlobalFileHandler.cpp.o.requires
 CMakeFiles/database.dir/requires: CMakeFiles/database.dir/src/Record.cpp.o.requires

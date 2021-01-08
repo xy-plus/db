@@ -2,7 +2,7 @@
 
 %{
 #include "Tree.h"
-#include "parser.tab.cpp"
+#include "parser.tab.hpp"
 #ifdef __STRICT_ANSI__
 #undef __STRICT_ANSI__
 #include <cstdio>

@@ -1,4 +1,5 @@
 file(REMOVE_RECURSE
+  "CMakeFiles/database.dir/filesystem/utils/MyBitMap.cpp.o"
   "CMakeFiles/database.dir/src/FileHandler.cpp.o"
   "CMakeFiles/database.dir/src/GlobalFileHandler.cpp.o"
   "CMakeFiles/database.dir/src/Record.cpp.o"

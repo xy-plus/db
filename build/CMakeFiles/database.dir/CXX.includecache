@@ -50,9 +50,15 @@ fcntl.h
 ../../src/global.h
 /home/yuanj17/Desktop/db/src/global.h
 
+/home/yuanj17/Desktop/db/filesystem/utils/MyBitMap.cpp
+MyBitMap.h
+/home/yuanj17/Desktop/db/filesystem/utils/MyBitMap.h
+
 /home/yuanj17/Desktop/db/filesystem/utils/MyBitMap.h
 iostream
 -
+MyBitMap.h
+/home/yuanj17/Desktop/db/filesystem/utils/MyBitMap.h
 
 /home/yuanj17/Desktop/db/filesystem/utils/MyHashMap.h
 pagedef.h
@@ -343,8 +349,8 @@ inttypes.h
 -
 Tree.h
 /home/yuanj17/Desktop/db/src/parser/Tree.h
-parser.tab.cpp
-/home/yuanj17/Desktop/db/src/parser/parser.tab.cpp
+parser.tab.hpp
+/home/yuanj17/Desktop/db/src/parser/parser.tab.hpp
 cstdio
 -
 cstdio
@@ -381,6 +387,8 @@ stdlib.h
 -
 stdio.h
 -
+
+/home/yuanj17/Desktop/db/src/parser/parser.tab.hpp
 
 /home/yuanj17/Desktop/db/src/utils.h
 global.h
