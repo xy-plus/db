@@ -3,9 +3,7 @@
 
 
 #include <map>
-#include "GlobalFileHandler.hpp"
-#include "parser/Tree.h"
-#include "RecordDescriptor.h"
+#include "GlobalFileHandler.h"
 #include "DBHandle.h"
 
 

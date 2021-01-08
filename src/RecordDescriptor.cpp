@@ -1,8 +1,6 @@
 #include <string.h>
 #include "RecordDescriptor.h"
 #include "SystemManager.h"
-#include "FileScan.hpp"
-
 using namespace std;
 
 RecordDescriptor::RecordDescriptor() {

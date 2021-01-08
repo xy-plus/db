@@ -3,8 +3,9 @@
 
 #include <vector>
 #include "global.h"
-#include "Record.hpp"
 #include "RecordDescriptor.h"
+#include "FileScan.h"
+#include "Printer.h"
 
 class SystemManager;
 

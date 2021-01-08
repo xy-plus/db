@@ -2,9 +2,9 @@
 #include <vector>
 #include <string>
 #include "utils.h"
-#include "Types.hpp"
-#include "Record.hpp"
-#include "FileHandler.hpp"
+#include "Value.hpp"
+#include "Record.h"
+#include "FileHandler.h"
 #include "../filesystem/fileio/FileManager.h"
 #include "../filesystem/utils/MyHashMap.h"
 #define MAX_RECORD_SIZE 4096

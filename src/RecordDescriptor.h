@@ -4,9 +4,10 @@
 #include <string>
 #include <map>
 #include "parser/Tree.h"
-#include "Record.hpp"
 
 class Printer;
+class Record;
+class RecordID;
 
 // RecordDescriptor is a concrete class for Record
 // We can access Record's data by attrName

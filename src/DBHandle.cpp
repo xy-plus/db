@@ -2,9 +2,7 @@
 #include <set>
 #include <map>
 #include "DBHandle.h"
-#include "GlobalFileHandler.hpp"
-#include "FileScan.hpp"
-#include "Printer.hpp"
+#include "GlobalFileHandler.h"
 #include "SystemManager.h"
 
 using namespace std;

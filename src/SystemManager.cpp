@@ -7,12 +7,8 @@
 #include <algorithm>
 #include <dirent.h>
 #include "SystemManager.h"
-#include "FileScan.hpp"
 #include "DBHandle.h"
-#include "Printer.hpp"
 #include "IndexManager.hpp"
-#include "GlobalFileHandler.hpp"
-#include "BTree.hpp"
 
 #ifdef __APPLE__
 #include <sys/stat.h>
@@ -692,7 +688,7 @@ int SystemManager::createIndex(string relName, Attribute attrName, string idxNam
 			break;
 		case T_FLOAT:
 			temp.setAttrType(NUMERIC);
-			temp.setNumericString(to_string(data));
+			temp.setNumeric(atof(data));
 			break;
 		case T_STRING:
 			temp.setAttrType(T_CHAR);
@@ -1024,7 +1020,7 @@ int SystemManager::Insert(std::string relName, std::vector<std::string>* attrs, 
 				break;
 			case T_FLOAT:
 				temp.setAttrType(NUMERIC);
-				temp.setNumericString(to_string(data));
+				temp.setNumeric(atof(data));
 				break;
 			case T_STRING:
 				temp.setAttrType(T_CHAR);
@@ -1147,7 +1143,7 @@ int SystemManager::Insert(std::string relName, std::vector<std::string>* attrs, 
 				break;
 			case T_FLOAT:
 				temp.setAttrType(NUMERIC);
-				temp.setNumericString(to_string(data));
+				temp.setNumeric(atof(data));
 				break;
 			case T_STRING:
 				temp.setAttrType(T_CHAR);
@@ -1269,7 +1265,7 @@ int SystemManager::Update(std::string relName,
 							break;
 						case T_FLOAT:
 							temp.setAttrType(NUMERIC);
-							temp.setNumericString(to_string(data));
+							temp.setNumeric(atof(data));
 							break;
 						case T_STRING:
 							temp.setAttrType(T_CHAR);
@@ -1384,7 +1380,7 @@ int SystemManager::Update(std::string relName,
 							break;
 						case T_FLOAT:
 							temp.setAttrType(NUMERIC);
-							temp.setNumericString(to_string(data));
+							temp.setNumeric(atof(data));
 							break;
 						case T_STRING:
 							temp.setAttrType(T_CHAR);
@@ -1463,7 +1459,7 @@ int SystemManager::Update(std::string relName,
 					break;
 				case T_FLOAT:
 					temp.setAttrType(NUMERIC);
-					temp.setNumericString(to_string(data));
+					temp.setNumeric(atof(data));
 					break;
 				case T_STRING:
 					temp.setAttrType(T_CHAR);
@@ -1580,7 +1576,7 @@ int SystemManager::Update(std::string relName,
 					break;
 				case T_FLOAT:
 					temp.setAttrType(NUMERIC);
-					temp.setNumericString(to_string(data));
+					temp.setNumeric(atof(data));
 					break;
 				case T_STRING:
 					temp.setAttrType(T_CHAR);
@@ -1698,7 +1694,7 @@ int SystemManager::Delete(std::string relName, std::vector<ComparisonTree::Compa
 						break;
 					case T_FLOAT:
 						temp.setAttrType(NUMERIC);
-						temp.setNumericString(to_string(data));
+						temp.setNumeric(atof(data));
 						break;
 					case T_STRING:
 						temp.setAttrType(T_CHAR);
@@ -1973,7 +1969,7 @@ vector<RecordDescriptor> SystemManager::retrieveRecordsByIndex(string relName,
 				break;
 			case T_FLOAT:
 				temp.setAttrType(NUMERIC);
-				temp.setNumericString(to_string(data));
+				temp.setNumeric(atof(data));
 				break;
 			case T_STRING:
 				temp.setAttrType(T_CHAR);

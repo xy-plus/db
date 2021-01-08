@@ -1,12 +1,11 @@
 #include <assert.h>
-#include "GlobalFileHandler.hpp"
-#include "Record.hpp"
-#include "test.hpp"
-#include "parser/parser.tab.c"
-#include "parser/lex.yy.c"
+// #include "test.hpp"
 #include "SystemManager.h"
-//#include "index/BTree.hpp"
-//#include "index/IndexManager.hpp"
+
+struct yy_buffer_state;
+extern int yyparse();
+extern void yy_switch_to_buffer(yy_buffer_state *);
+extern yy_buffer_state *yy_scan_string(const char *);
 
 const char testFileName[] = "test.txt";
 

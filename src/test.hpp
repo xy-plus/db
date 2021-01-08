@@ -2,8 +2,8 @@
 #define TEST_HPP
 
 #include <string>
-#include "FileHandler.hpp"
-#include "Record.hpp"
+#include "FileHandler.h"
+#include "Record.h"
 
 bool check(Record& r) {
     return r.getData()[0] == 7;

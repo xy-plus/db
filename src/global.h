@@ -1,10 +1,10 @@
-#ifndef DATABASE_GLOBAL_H
-#define DATABASE_GLOBAL_H
+#pragma once
 #include <cstdio>
 #include <cassert>
 #include <sstream>
 #include <vector>
 #include <regex>
+#include<math.h>
 using namespace std;
 
 #define MAX_PAGE_NUMBER 4096
@@ -165,6 +165,3 @@ template < typename T > std::string to_string( const T& n )
     stm << n ;
     return stm.str() ;
 }
-
-
-#endif 

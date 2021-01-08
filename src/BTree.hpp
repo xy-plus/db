@@ -1,9 +1,7 @@
 #pragma once
-#include "Record.hpp"
-#include "FileHandler.hpp"
+#include "Record.h"
+#include "FileHandler.h"
 #include "utils.h"
-#include "Types.hpp"
-#include "Value.hpp"
 #include "TreeNode.hpp"
 #include "../filesystem/fileio/FileManager.h"
 #include "../filesystem/utils/MyHashMap.h"
@@ -14,7 +12,6 @@
 using namespace std;
 
 class BTree {
-	// TODO : uodata record
 public:
 	BTree(FileHandler* fileHandler) {
 		this->fileHandler = fileHandler;
@@ -101,7 +98,6 @@ private:
 	}
 
 	bool checkType(Value a) {
-		// TODO Numeric
 		if (a.size() != numAttr) {
 			return false;
 		}
@@ -109,6 +105,7 @@ private:
 			Type temp = a.getVal(i);
 			if (temp.getType() != attrTypes[i])
 				return false;
+
 			if (attrTypes[i] == T_CHAR | attrTypes[i] == VARCHAR) {
 				if (attrLen[i] != temp.getLen()) {
 					return false;

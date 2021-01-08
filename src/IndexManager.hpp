@@ -1,10 +1,9 @@
 #pragma once
 #include "../filesystem/fileio/FileManager.h"
 #include "../filesystem/utils/MyHashMap.h"
-#include "Record.hpp"
-#include "FileHandler.hpp"
+#include "../filesystem/bufmanager/BufPageManager.h"
+#include "GlobalFileHandler.h"
 #include "utils.h"
-#include "Types.hpp"
 #include "BTree.hpp"
 #include <vector>
 
@@ -54,7 +53,7 @@ public:
 		}
 		string newFile = string(fileName);
 		for (int i = 0; i < num; ++i) {
-			newFile = newFile + '_' + to_string(indexNo[i]);
+			newFile = newFile + "_idx_" + to_string(indexNo[i]);
 		}
 		// create file
 		// TODO : ÐÞ¸ÄallLength
@@ -98,9 +97,11 @@ public:
 		int num = indexNo.size();
 		string newFile = string(fileName);
 		for (int i = 0; i < num; ++i) {
-			newFile = newFile + '_' + to_string(indexNo[i]);
+			newFile = newFile + "_idx_" + to_string(indexNo[i]);
 		}
-		// TODO : delete file
+
+		GlobalFileHandler* fh = GlobalFileHandler::instance();
+		fh->destroyFile(newFile.c_str());
 		return true;
 	}
 
@@ -108,7 +109,7 @@ public:
 		int num = indexNo.size();
 		string newFile = string(fileName);
 		for (int i = 0; i < num; ++i) {
-			newFile = newFile + '_' + to_string(indexNo[i]);
+			newFile = newFile + "_idx_" + to_string(indexNo[i]);
 		}
 
 		int fileID;

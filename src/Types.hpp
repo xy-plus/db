@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <vector>
+#include <cmath>
 #include "utils.h"
 
 using namespace std;
@@ -15,7 +16,6 @@ class Type {
 		date : year month day
 		char : length
 		varchar : maxlength length
-		numeric : allLength backLength;
 	*/
 	// num :
 	vector<int> num;
@@ -26,11 +26,9 @@ class Type {
 	vector<char> val;
 	
 	/*
-	numeric : numeric 从低到高存储，高低位补0
-	opt: 正负
+	numeric : numeric
 	*/
-	vector<int> numeric;
-	bool opt;
+	double numeric;
 
 	// DATE
 	bool setYear(int year) {
@@ -50,28 +48,15 @@ class Type {
 	bool setDay(int day) {
 		num[2] = day;
 	}
-	   	
-	// Numeric
-	vector<int> getFront(int l) {
-		vector<int> temp;
-		temp.clear();
-		// 从低位开始存储
-		for (int i = num[1]; i < num[0]; ++i)
-			temp.push_back(numeric[i]);
-		for (int i = num[0] - num[1]; i < l; ++i)
-			temp.push_back(0);
-		return temp;
-	}
 
-	vector<int> getBack(int l) {
-		vector<int> temp;
-		temp.clear();
-		// 从高位开始存储
-		for (int i = num[1] - 1; i >= 0; --i)
-			temp.push_back(numeric[i]);
-		for (int i = num[1]; i < l; ++i)
-			temp.push_back(0);
-		return temp;
+	bool comparable(Types A, Types B) {
+		if (A == B)
+			return true;
+		if (A == INTEGER && B == NUMERIC)
+			return true;
+		if (B == INTEGER && A == NUMERIC)
+			return true;
+		return false;
 	}
 
 	bool equal(Type b) {
@@ -80,13 +65,23 @@ class Type {
 		if (this->getIsNull())
 			return true;
 
-		if (b.type != this->type)
+		if (!comparable(b.type, this->type))
 			return false;
+
 		vector<int> t1;
 		vector<int> t2;
 		int l1, l2;
+		double aa, bb;
 		switch (type) {
 		case INTEGER:
+			if (b.type == NUMERIC) {
+				aa = this->num[0];
+				bb = b.getNumeric();
+				if (abs(aa - bb) < 0.000000001)
+					return true;
+				return false;
+			}
+
 			if (b.num[0] == this->num[0])
 				return true;
 			return false;
@@ -117,28 +112,18 @@ class Type {
 			return true;
 			break;
 		case NUMERIC:
-			if (b.opt != this->opt)
-				return false;
+			aa = this->getNumeric();
 
-			l1 = num[0] - num[1];
-			l2 = b.num[0] - b.num[1];
-			if (l1 < l2) l1 = l2;
-			t1 = getFront(l1);
-			t2 = b.getFront(l1);
-			for (int i = 0; i < l1; ++i)
-				if (t1[i] != t2[i])
-					return false;
-
-			l1 = num[1];
-			l2 = b.num[1];
-			if (l1 < l2) l1 = l2;
-			t1 = getBack(l1);
-			t2 = b.getBack(l1);
-			for (int i = 0; i < l1; ++i) {
-				if (t1[i] != t2[i])
-					return false;
+			if (b.type == INTEGER) {
+				bb = b.num[0];
 			}
-			return true;
+			else {
+				bb = b.getNumeric();
+			}
+
+			if (abs(aa - bb) < 0.000000001)
+				return true;
+			return false;
 			break;
 		default:
 			break;
@@ -152,15 +137,23 @@ class Type {
 		if (this->getIsNull())
 			return true;
 
-		if (b.type != this->type)
+		if (!comparable(b.type, this->type))
 			return false;
 		string s1 = "";
 		string s2 = "";
 		vector<int> t1;
 		vector<int> t2;
 		int l1, l2;
+		double aa, bb;
 		switch (type) {
 		case INTEGER:
+			if (b.type == NUMERIC) {
+				aa = this->num[0];
+				bb = b.getNumeric();
+				if (aa < bb)
+					return true;
+				return false;
+			}
 			if (this->num[0] < b.num[0])
 				return true;
 			return false;
@@ -197,67 +190,17 @@ class Type {
 			return s1 < s2;
 			break;
 		case NUMERIC:
-			if (b.opt == true && this->opt == false)
-				return true;
-			if (b.opt == false && this->opt == true)
-				return true;
-			if (this->opt == true) {
-				l1 = num[0] - num[1];
-				l2 = b.num[0] - b.num[1];
-				if (l1 < l2) l1 = l2;
-				t1 = getFront(l1);
-				t2 = b.getFront(l1);
-				// 整数部分 从大到小 比较
-				for (int i = l1 - 1; i >= 0; --i) {
-					if (t1[i] < t2[i])
-						return true;
-					if (t1[i] > t2[i])
-						return false;
-				}
-
-				l1 = num[1];
-				l2 = b.num[1];
-				if (l1 < l2) l1 = l2;
-				t1 = getBack(l1);
-				t2 = b.getBack(l1);
-				// 小数部分 从小到大 比较
-				for (int i = 0; i < l1; ++i) {
-					if (t1[i] < t2[i])
-						return true;
-					if (t1[i] > t2[i])
-						return false;
-				}
-				return false;
+			aa = this->getNumeric();
+			if (b.type == INTEGER) {
+				bb = b.num[0];
 			}
 			else {
-				// 负数 大小相反
-				l1 = num[0] - num[1];
-				l2 = b.num[0] - b.num[1];
-				if (l1 < l2) l1 = l2;
-				t1 = getFront(l1);
-				t2 = b.getFront(l1);
-				// 整数部分 从大到小 比较
-				for (int i = l1 - 1; i >= 0; --i) {
-					if (t1[i] < t2[i])
-						return false;
-					if (t1[i] > t2[i])
-						return true;
-				}
-
-				l1 = num[1];
-				l2 = b.num[1];
-				if (l1 < l2) l1 = l2;
-				t1 = getBack(l1);
-				t2 = b.getBack(l1);
-				// 小数部分 从小到大 比较
-				for (int i = 0; i < l1; ++i) {
-					if (t1[i] < t2[i])
-						return false;
-					if (t1[i] > t2[i])
-						return true;
-				}
-				return false;
+				bb = b.getNumeric();
 			}
+			
+			if (aa < bb)
+				return true;
+			return false;
 			break;
 		default:
 			break;
@@ -270,6 +213,7 @@ public:
 		type = INTEGER;
 		num.clear();
 		val.clear();
+		numeric = 0;
 	}
 
 	void toChars(char* buf, int& len) {
@@ -306,13 +250,8 @@ public:
 				buf[i + 1] = val[i];
 			break;
 		case NUMERIC:
-			len += num[0] + 3;
-			buf[0] = (char)num[0];
-			buf[1] = (char)num[1];
-			if (opt) buf[2] = (char)1;
-				else buf[2] = (char)0;
-			for (int i = 0; i < num[0]; ++i)
-				buf[i + 3] = (char)numeric[i];
+			len += sizeof(double);
+			((double*)buf)[0] = numeric;
 			break;
 		default:
 			break;
@@ -357,13 +296,7 @@ public:
 			}
 			break;
 		case NUMERIC:
-			num[0] = (int)(buf[0]);
-			num[1] = (int)(buf[1]);
-			tp = (int)(buf[2]);
-			if (tp == 0) opt = true;
-			  else opt = false;
-			for (int i = 0; i < num[0]; ++i)
-				numeric.push_back((int)buf[3 + i]);
+			numeric = ((double*)(buf))[0];
 			break;
 		default:
 			break;
@@ -398,12 +331,7 @@ public:
 			}
 			break;
 		case NUMERIC:
-			num[0] = b.num[0];
-			num[1] = b.num[1];
-			opt = b.opt;
-			numeric.clear();
-			for (int i = 0; i < num[0]; ++i)
-				numeric.push_back(b.numeric[i]);
+			numeric = b.numeric;
 			break;
 		default:
 			break;
@@ -535,127 +463,18 @@ public:
 		return num[0];
 	}
 
-	// TODO : more way set get NUMERIC
-	void setNumericLength(int allLen = 20, int backLen = 2) {
-		num[0] = allLen;
-		num[1] = backLen;
-		numeric.clear();
-		for (int i = 0; i < allLen; ++i) {
-			numeric.push_back(0);
-		}
-	}
-
-	int getNumericAllLength() {
-		return num[0];
-	}
-
-	int getNumericBackLength() {
-		return num[1];
-	}
-
 	double getNumeric() {
-		vector<int> t1 = getFront(num[0] - num[1]);
-		double temp = 0;
-		double a = 1;
-		for (int i = 0; i < num[0] - num[1]; ++i) {
-			temp = temp + a * t1[i];
-			a = a * 10;
-		}
-		t1 = getBack(num[1]);
-		a = 0.1;
-		for (int i = 0; i <  num[1]; ++i) {
-			temp = temp + a * t1[i];
-			a = a / 10;
-		}
-		return temp;
+		return numeric;
 	}
 
 	void setNumeric(double nums) {
-		if (nums < 0) {
-			nums = -nums;
-			setNumericOpt(false);
-		}
-		long long temp = trunc(nums);
-		double d = nums - temp;
-		if (num[1] == 0) {
-			temp = round(nums);
-		}
-		for (int i = num[1]; i < num[0]; ++i) {
-			numeric[i] = temp % 10;
-			temp = temp / 10;
-		}
-		for (int i = 0; i < num[1]; ++i) {
-			d = d * 10;
-			numeric[i] = trunc(d);
-			if (i == num[1] - 1) {
-				numeric[i] = round(d);
-			}
-		}
-	}
-
-	string getNumericString() {
-		string temp = "";
-		if (opt == false) temp = "-";
-		int l = num[0] - 1;
-		while (l >= 0 && numeric[l] != 0) {
-			l--;
-		}
-		for (int i = l; i >= num[1]; --i)
-			temp = temp + to_string(numeric[i]);
-		if (num[1] > 0)
-			temp = temp + ".";
-		for (int i = num[1] - 1; i >= 0; --i)
-			temp = temp + to_string(numeric[i]);
-		return temp;
-	}
-
-	void setNumericString(string nums) {
-		int l = 0;
-		if (nums[0] == '-') {
-			l = 1;
-			setNumericOpt(false);
-		}
-		int len = nums.length();
-		vector<int> t1;
-		t1.clear();
-		while (l < len) {
-			char ch = nums[l];
-			if (ch == '.') {
-				l++;
-				break;
-			}
-			t1.push_back(ch - '0');
-			l++;
-		}
-		for (int i = 0; i < t1.size(); ++i) {
-			numeric[num[1] + t1.size() - 1 - i] = t1[i];
-		}
-		t1.clear();
-		while (l < len) {
-			char ch = nums[l];
-			t1.push_back(ch - '0');
-			l++;
-		}
-		for (int i = 0; i < t1.size(); ++i) {
-			if (nums[1] <= i)
-				break;
-			numeric[nums[1] - 1 - i] = t1[i];
-		}
-	}
-
-	void setNumericOpt(bool _opt) {
-		opt = _opt;
-	}
-
-	bool getNumericOpt() {
-		return opt;
+		numeric = nums;
 	}
 
 	void setAttrType(Types tp) {
 		type = tp;
 		num.clear();
 		val.clear();
-		numeric.clear();
 		switch (type) {
 		case INTEGER:
 			num.push_back(0);
@@ -673,9 +492,6 @@ public:
 			num.push_back(0);
 			break;
 		case NUMERIC:
-			num.push_back(0);
-			num.push_back(0);
-			opt = true;
 			break;
 		default:
 			break;
@@ -683,7 +499,7 @@ public:
 	}
 
 	int getLength() {
-		// 1 ： type 、 isnull、
+		// 1 ?? type 、 isnull、
 		switch (type) {
 		case INTEGER:
 			return 4 + 2;
@@ -700,7 +516,7 @@ public:
 			break;
 		case NUMERIC:
 			// all、back、opt
-			return 3 + num[0] + 2;
+			return sizeof(double) + 2;
 			break;
 		default:
 			break;
@@ -757,7 +573,7 @@ public:
 
 	bool cmp(Type b, CmpOP op, bool checked) {
 		bool ok = false;
-		if (b.type == this->type) {
+		if (comparable(b.type, this->type)) {
 			switch (op) {
 			case T_EQ:
 				if ((checked) && (b.getIsNull() || this->getIsNull()))
@@ -799,7 +615,6 @@ public:
 				ok = getIsNull();
 				break;
 			case T_IN:
-				// TODO
 				break;
 			default:
 				break;

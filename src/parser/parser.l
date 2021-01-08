@@ -1,8 +1,8 @@
 %option caseless
 
 %{
-#include "tree.h"
-#include "parser.tab.c"
+#include "Tree.h"
+#include "parser.tab.cpp"
 #ifdef __STRICT_ANSI__
 #undef __STRICT_ANSI__
 #include <cstdio>

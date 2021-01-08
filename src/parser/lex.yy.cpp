@@ -1,5 +1,5 @@
 
-#line 2 "lex.yy.c"
+#line 3 "lex.yy.c"
 
 #define  YY_INT_ALIGNED short int
 
@@ -718,8 +718,8 @@ int yy_flex_debug = 0;
 char *yytext;
 #line 1 "parser.l"
 #line 4 "parser.l"
-#include "tree.h"
-#include "parser.tab.c"
+#include "Tree.h"
+#include "parser.tab.cpp"
 #ifdef __STRICT_ANSI__
 #undef __STRICT_ANSI__
 #include <cstdio>
@@ -738,8 +738,8 @@ char* get_text(const char *text) {
 
 void yyerror(const char *);
 
-#line 741 "lex.yy.c"
 #line 742 "lex.yy.c"
+#line 743 "lex.yy.c"
 
 #define INITIAL 0
 
@@ -750,7 +750,7 @@ void yyerror(const char *);
  */
 #include <unistd.h>
 #endif
-    
+
 #ifndef YY_EXTRA_TYPE
 #define YY_EXTRA_TYPE void *
 #endif
@@ -959,7 +959,7 @@ YY_DECL
 #line 35 "parser.l"
 
 
-#line 962 "lex.yy.c"
+#line 963 "lex.yy.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -1313,7 +1313,7 @@ YY_RULE_SETUP
 #line 97 "parser.l"
 ECHO;
 	YY_BREAK
-#line 1316 "lex.yy.c"
+#line 1317 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 

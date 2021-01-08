@@ -4,13 +4,13 @@
 #include <cstdio>
 #define __STRICT_ANSI__
 #else
-#include <cstdio>
+#include <stdio.h>
 #endif
 
 #include <stdlib.h>
 #include <string>
 #include "../global.h"
-#include "tree.h"
+#include "Tree.h"
 
 int yylex();
 void yyerror(const char *);
