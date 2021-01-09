@@ -495,9 +495,7 @@ int SystemManager::openDB(const char *dbName) {
 	printf("[INFO] Open database %s success.\n", dbName);
 	hasOpenDB = true;
 	strcpy(currentDBName, dbName);
-	printf("strcpy success\n");
 	RETURNIF(dbHandle.refreshHandle());
-	printf("refresh success\n");
 	return 0;
 }
 
