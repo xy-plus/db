@@ -118,7 +118,7 @@ GlobalFileHandler &GlobalFileHandler::operator=(const GlobalFileHandler &) { ret
 
 int GlobalFileHandler::openFile(const char *fileName, FileHandler &fileHandle) {
 	int fileID;
-	RETURNIF(fileManager->openFile(fileName, fileID));
+	fileManager->openFile(fileName, fileID);
 	currentFileHandle = FileHandler(bufPageManager, fileID);
 	return RETVAL_OK;
 }
